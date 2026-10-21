@@ -156,7 +156,7 @@ export default function WorkspaceModulePage() {
         <label>Audience<select style={field} value={targetRole} onChange={(e) => setTargetRole(e.target.value)}><option value="all">Everyone</option><option value="teacher">Teachers</option><option value="student">Students</option></select></label>
         <div><button style={button} disabled={saving}><Plus size={15}/>{saving ? "Publishing…" : "Publish update"}</button></div>
       </form>}
-      {message && <div role="status" style={{ ...panel, marginBottom: 18, color: "#e8d7a9" }}>{message}</div>}
+      {message && <div role="status" aria-live="polite" style={{ ...panel, marginBottom: 18, color: "#e8d7a9" }}>{message}</div>}
       <label style={{ display: "block", marginBottom: 16, color: "#d8c89f", fontSize: 13 }}>Search records<input style={field} value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Search title, details, status, or severity…" aria-label="Search workspace records"/></label>
       {busy ? <div style={panel}>Loading securely…</div> : filteredItems.length ? <div style={{ display: "grid", gap: 12 }}>
         {filteredItems.map((item) => <article key={item.id} style={panel}>
