@@ -125,19 +125,19 @@ export default function WorkspaceModulePage() {
     finally { setSaving(false); }
   }
 
-  if (!validWorkspace) return <main style={shell}><section style={{ ...panel, maxWidth: 650, margin: "10vh auto" }}><h1>Workspace not found</h1><button style={button} onClick={() => router.replace("/dashboard")}>Return to overview</button></section></main>;
+  if (!validWorkspace) return <main style={shell}><section style={{ ...panel, maxWidth: 650, margin: "10vh auto" }}><h1>Workspace not found</h1><button type="button" style={button} onClick={() => router.replace("/dashboard")}>Return to overview</button></section></main>;
 
   const Icon = workspace === "content" ? FileText : workspace === "bugs" ? Bug : workspace === "support" ? LifeBuoy : Activity;
   return <main style={shell}>
     <header style={{ maxWidth: 1100, margin: "0 auto 30px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
       <a href="/dashboard" style={{ color: "#f0d9a0", textDecoration: "none", fontWeight: 800, letterSpacing: ".02em" }}>KVSync <span style={{ color: "#d3a64f" }}>Pro</span></a>
-      <button style={button} onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button>
+      <button type="button" style={button} onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button>
     </header>
     <section style={{ maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ color: "#c5a65c", fontSize: 11, letterSpacing: ".18em", fontWeight: 800, marginBottom: 12 }}>PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", gap: 20, flexWrap: "wrap", marginBottom: 22 }}>
         <div><h1 style={{ fontSize: "clamp(30px,5vw,44px)", letterSpacing: "-.04em", margin: 0 }}>{labels[workspace]}</h1><p style={{ color: "#a9a8ad", margin: "9px 0 0" }}>{workspace === "content" ? "School updates and authorized publishing." : workspace === "bugs" ? "Product issue tracking with role-checked review." : workspace === "support" ? "Support conversations available to authorized staff." : "Recent moderation events or your quality reports."}</p></div>
-        <button style={button} onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button>
+        <button type="button" style={button} onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button>
       </div>
       <div style={{ ...panel, marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
         <ShieldCheck color="#d5b367" size={22}/><div><strong>Access verified</strong><div style={{ color: "#a9a8ad", fontSize: 13, marginTop: 4 }}>{primaryRole ? primaryRole.replaceAll("_", " ") : "Checking role"} · Database row-level security remains active</div></div>
