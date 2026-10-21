@@ -152,12 +152,12 @@ export default function AttendancePage() {
   }
 
   return <main className="attendance-page">
-    <header><a href="/dashboard" className="attendance-logo">KVSync <em>Pro</em></a><button onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button></header>
+    <header><a href="/dashboard" className="attendance-logo">KVSync <em>Pro</em></a><button type="button" onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button></header>
     <section>
       <div className="attendance-eyebrow">PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div>
       <h1>Attendance records</h1>
       <p className="attendance-intro">Class-scoped attendance. Database row-level security decides which records your account can read or change.</p>
-      <div className="attendance-verified"><ShieldCheck size={18}/><span><b>Role verified</b><small>{role ? role.replaceAll("_", " ") : "Checking your assigned role"}{canMark ? " · Marking enabled for authorized classes" : ""}</small></span><button onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
+      <div className="attendance-verified"><ShieldCheck size={18}/><span><b>Role verified</b><small>{role ? role.replaceAll("_", " ") : "Checking your assigned role"}{canMark ? " · Marking enabled for authorized classes" : ""}</small></span><button type="button" onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
 
       {canMark && <div className="attendance-controls">
         <label><span><Users size={14}/> Class</span><select value={classId} onChange={(event) => setClassId(event.target.value)} disabled={busy || !classes.length}><option value="">Select class</option>{classes.map((item) => <option key={item.id} value={item.id}>{item.grade}-{item.section}{item.room_number ? " · Room " + item.room_number : ""}</option>)}</select></label>
@@ -166,7 +166,7 @@ export default function AttendancePage() {
 
       {busy ? <div className="attendance-message">Loading attendance securely…</div> : <>
         {canMark && classId && <div className="attendance-roster">
-          <div className="attendance-roster-heading"><div><h2>{selectedClass ? selectedClass.grade + "-" + selectedClass.section : "Class roster"}</h2><p>Choose a status per student. Leave a row unselected to make no change.</p></div><button onClick={() => void saveAttendance()} disabled={saving || !students.length}><Save size={14}/>{saving ? "Saving…" : "Save attendance"}</button></div>
+          <div className="attendance-roster-heading"><div><h2>{selectedClass ? selectedClass.grade + "-" + selectedClass.section : "Class roster"}</h2><p>Choose a status per student. Leave a row unselected to make no change.</p></div><button type="button" onClick={() => void saveAttendance()} disabled={saving || !students.length}><Save size={14}/>{saving ? "Saving…" : "Save attendance"}</button></div>
           {!students.length ? <div className="attendance-message">No students are linked to this class.</div> : students.map((student) => {
             const draft = drafts[student.id] ?? { status: "", note: "" };
             return <div className="attendance-roster-row" key={student.id}>
