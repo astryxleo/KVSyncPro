@@ -147,7 +147,7 @@ export default function AccountsPage() {
             <div className="accounts-form-title"><UserPlus size={18} /><div><strong>New account</strong><small>All fields are validated before the request is sent.</small></div></div>
             <div className="accounts-fields">
               <label>Full name<input value={fullName} onChange={(event) => setFullName(event.target.value)} maxLength={120} autoComplete="name" placeholder="Enter the person's full name" required /></label>
-              <label>KVSync Pro login ID<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} autoComplete="off" placeholder="teacher01@kvsync.pro" pattern="^[^\\s@]+@kvsync\\.pro$" title="Use a login ID ending in @kvsync.pro" required /></label>
+              <label>KVSync Pro login ID<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} autoComplete="off" placeholder="teacher01@kvsync.pro" pattern="^[A-Za-z0-9._+-]+@kvsync[.]pro$" title="Use a login ID ending in @kvsync.pro" required /></label>
               <label>Account role<select value={role} onChange={(event) => setRole(event.target.value as AppRole)} required>{roleOptions.map((item) => <option key={item} value={item}>{roleNames[item]}</option>)}</select></label>
               {role === "student" && <>
                 <label>Class and section<select value={classId} onChange={(event) => setClassId(event.target.value)} required><option value="">Select class</option>{classes.map((item) => <option key={item.id} value={item.id}>Class {item.grade}{item.section}</option>)}</select></label>
