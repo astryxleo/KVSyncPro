@@ -107,7 +107,11 @@ export default function DashboardPage() {
       "Timetable": "/dashboard/timetable",
       "Announcements": "/dashboard/announcements",
       "Community": "/dashboard/community",
-      "Moderation": "/dashboard/moderation",\n      "Content management": "/dashboard/content",\n      "Bug reports": "/dashboard/bugs",\n      "Support inbox": "/dashboard/support",\n      "System activity": "/dashboard/activity",
+      "Moderation": "/dashboard/moderation",
+      "Content management": "/dashboard/content",
+      "Bug reports": "/dashboard/bugs",
+      "Support inbox": "/dashboard/support",
+      "System activity": "/dashboard/activity",
     };
     const path = paths[label];
     if (path) {
