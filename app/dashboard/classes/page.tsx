@@ -207,17 +207,26 @@ export default function ClassesPage() {
       if (authError || !auth.user) { router.replace("/"); return; }
       const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
       if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
-        throw new Error("Only Operator or Admin can manage homeroom assignments.");
+        throw new Error("Only Operator or Admin can manage class-teacher assignments.");
       }
-      const { error } = await db.from("class_teachers").insert({ class_id: assignmentClass, teacher_id: assignmentTeacher });
+      const existingAssignment = classTeachers.find((item) => item.class_id === assignmentClass && item.academic_year === "2026-2027");
+      const assignmentQuery = existingAssignment
+        ? db.from("class_teachers").update({ teacher_id: assignmentTeacher }).eq("id", existingAssignment.id)
+        : db.from("class_teachers").insert({ class_id: assignmentClass, teacher_id: assignmentTeacher, academic_year: "2026-2027" });
+      const { data: savedAssignment, error } = await assignmentQuery
+        .select("id,class_id,teacher_id,academic_year")
+        .single();
       if (error) {
-        if (error.code === "23505") throw new Error("This class already has a homeroom teacher assigned for the academic year.");
-        if (error.code === "42501") throw new Error("Database permissions do not allow this assignment.");
-        throw new Error("Could not assign the teacher. Check that the account has the Teacher role.");
+        if (error.code === "23505") throw new Error("This class already has a class teacher assigned for 2026–2027. Refresh the page and try again.");
+        if (error.code === "42501") throw new Error("Database permissions do not allow this assignment. Check the Operator/Admin role.");
+        throw new Error(`Class teacher was not saved: ${error.message}`);
+      }
+      if (!savedAssignment?.id || savedAssignment.teacher_id !== assignmentTeacher) {
+        throw new Error("The database did not confirm the class-teacher assignment. Please refresh and try again.");
       }
       setAssignmentClass("");
       setAssignmentTeacher("");
-      setMessage("Homeroom teacher assigned successfully.");
+      setMessage("Class teacher assignment saved successfully.");
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to assign this teacher.");
@@ -284,7 +293,7 @@ export default function ClassesPage() {
 
   const removeHomeroomTeacher = async (assignment: ClassTeacherRow) => {
     if (role !== "operator" && role !== "admin") return;
-    if (!window.confirm("Remove this homeroom teacher assignment?")) return;
+    if (!window.confirm("Remove this class teacher assignment?")) return;
     setAssignmentBusy(true);
     setMessage("");
     try {
@@ -293,11 +302,11 @@ export default function ClassesPage() {
       if (authError || !auth.user) { router.replace("/"); return; }
       const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
       if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
-        throw new Error("Only Operator or Admin can manage homeroom assignments.");
+        throw new Error("Only Operator or Admin can manage class-teacher assignments.");
       }
       const { error } = await db.from("class_teachers").delete().eq("id", assignment.id);
       if (error) throw new Error("Could not remove the assignment under current database permissions.");
-      setMessage("Homeroom assignment removed.");
+      setMessage("Class teacher assignment removed.");
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to remove this assignment.");
@@ -406,7 +415,8 @@ export default function ClassesPage() {
           <Search size={16} />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search class, room, roll number or student name" />
         </label>
-        {busy ? <div className="classes-empty">Loading class records securely…</div> : message && !classes.length ? <div role="status" aria-live="polite" className="classes-empty">{message}</div> : visibleClasses.length ? (
+        {message && <div role="status" aria-live="polite" className="classes-empty" style={{marginBottom:12}}>{message}</div>}
+        {busy ? <div className="classes-empty">Loading class records securely…</div> : !classes.length ? null : visibleClasses.length ? (
           <div className="classes-grid">
             {visibleClasses.map((schoolClass) => {
               const roster = students.filter((student) => student.class_id === schoolClass.id);
@@ -423,21 +433,15 @@ export default function ClassesPage() {
                     const teacher = assignment ? teachers.find((item) => item.user_id === assignment.teacher_id) : null;
                     return (
                       <div className="classes-assignment">
-                        <div className="classes-assignment-heading">Homeroom teacher</div>
-                        {assignment ? (
-                          <div className="classes-assigned-teacher">
-                            <span>{teacher?.full_name || teacher?.email || "Assigned teacher"}</span>
-                            <button type="button" disabled={assignmentBusy} onClick={() => void removeHomeroomTeacher(assignment)}>Remove</button>
-                          </div>
-                        ) : (
-                          <form className="classes-assignment-form" onSubmit={assignHomeroomTeacher}>
-                            <select aria-label={`Teacher for class ${schoolClass.grade}${schoolClass.section}`} value={assignmentClass === schoolClass.id ? assignmentTeacher : ""} onChange={(event) => { setAssignmentClass(schoolClass.id); setAssignmentTeacher(event.target.value); }} required>
-                              <option value="">Select teacher</option>
-                              {teachers.map((item) => <option key={item.user_id} value={item.user_id}>{item.full_name || item.email || item.user_id}</option>)}
-                            </select>
-                            <button type="submit" disabled={assignmentBusy || !teachers.length} onClick={() => setAssignmentClass(schoolClass.id)}>{assignmentBusy ? "Saving…" : "Assign"}</button>
-                          </form>
-                        )}
+                        <div className="classes-assignment-heading">Class teacher · 2026–2027</div>
+                        {assignment && <div className="classes-assigned-teacher"><span>Currently assigned: {teacher?.full_name || teacher?.email || "Teacher account"}</span><button type="button" disabled={assignmentBusy} onClick={() => void removeHomeroomTeacher(assignment)}>Remove</button></div>}
+                        <form className="classes-assignment-form" onSubmit={assignHomeroomTeacher}>
+                          <select aria-label={`Class teacher for class ${schoolClass.grade}${schoolClass.section}`} value={assignmentClass === schoolClass.id ? assignmentTeacher : (assignment?.teacher_id ?? "")} onChange={(event) => { setAssignmentClass(schoolClass.id); setAssignmentTeacher(event.target.value); }} required>
+                            <option value="">Select class teacher</option>
+                            {teachers.map((item) => <option key={item.user_id} value={item.user_id}>{item.full_name || item.email || item.user_id}</option>)}
+                          </select>
+                          <button type="submit" disabled={assignmentBusy || !teachers.length || !(assignmentClass === schoolClass.id ? assignmentTeacher : assignment?.teacher_id)}>{assignmentBusy ? "Saving…" : assignment ? "Save change" : "Assign class teacher"}</button>
+                        </form>
                       </div>
                     );
                   })()}
