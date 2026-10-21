@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Building2, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Building2, Download, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 type SchoolRole = "operator" | "admin" | "teacher";
@@ -308,6 +308,38 @@ export default function ClassesPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  const exportRoster = () => {
+    if (role !== "operator" && role !== "admin") {
+      setMessage("Roster export is restricted to Operator and Admin accounts.");
+      return;
+    }
+    const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const rows = [
+      ["Class", "Section", "Roll number", "Student name", "User ID"],
+      ...students.map((student) => {
+        const schoolClass = classes.find((item) => item.id === student.class_id);
+        return [
+          String(schoolClass?.grade ?? ""),
+          schoolClass?.section ?? "",
+          student.roll_number ?? "",
+          names[student.user_id] ?? "Name not linked",
+          student.user_id,
+        ];
+      }),
+    ];
+    const csv = rows.map((row) => row.map((cell) => csvCell(String(cell))).join(",")).join("\\r\\n");
+    const blob = new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `kvsync-student-roster-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setMessage(`Exported ${students.length} student record(s) from the classes currently visible to your role.`);
+  };
+
   const visibleClasses = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return classes;
@@ -333,7 +365,8 @@ export default function ClassesPage() {
             <h1>Classes &amp; people</h1>
             <p>Class directory and student roster visible to your verified school role.</p>
           </div>
-          <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>
+          {(role === "operator" || role === "admin") && <button className="classes-provision-link" onClick={exportRoster} disabled={busy}><Download size={14} /> Export roster CSV</button>}
+          {(role === "operator" || role === "admin" || role === "data_content_manager") && <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>
           <button onClick={() => void load()} disabled={busy}><RefreshCw size={14} /> Refresh</button>
         </div>
         <div className="classes-verified">
@@ -447,7 +480,7 @@ export default function ClassesPage() {
             })}
           </div>
         ) : <div className="classes-empty">No classes match your search.</div>}
-        <p className="classes-caveat">Teacher homeroom assignment and class creation are available to Operator/Admin and remain enforced by database policies. Student roster edits and account provisioning are not enabled here.</p>
+        <p className="classes-caveat">Teacher homeroom assignment and class creation are available to Operator/Admin and remain enforced by database policies. Student roster export is restricted to Operator/Admin. Account invitations are handled in the dedicated provisioning workspace.</p>
       </section>
     </main>
   );
