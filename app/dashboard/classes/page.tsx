@@ -420,8 +420,8 @@ export default function ClassesPage() {
                         );
                       })}
                       <form className="classes-subject-form" onSubmit={assignSubjectTeacher}>
-                        <input aria-label="Subject name" value={subjectClass === schoolClass.id ? subjectName : ""} onChange={(event) => { setSubjectClass(schoolClass.id); setSubjectName(event.target.value); }} maxLength={80} placeholder="Subject (e.g. Mathematics)" required />
-                        <select aria-label="Subject teacher" value={subjectClass === schoolClass.id ? subjectTeacher : ""} onChange={(event) => { setSubjectClass(schoolClass.id); setSubjectTeacher(event.target.value); }} required>
+                        <input aria-label="Subject name" value={subjectClass === schoolClass.id ? subjectName : ""} onChange={(event) => { if (subjectClass !== schoolClass.id) setSubjectTeacher(""); setSubjectClass(schoolClass.id); setSubjectName(event.target.value); }} maxLength={80} placeholder="Subject (e.g. Mathematics)" required />
+                        <select aria-label="Subject teacher" value={subjectClass === schoolClass.id ? subjectTeacher : ""} onChange={(event) => { if (subjectClass !== schoolClass.id) setSubjectName(""); setSubjectClass(schoolClass.id); setSubjectTeacher(event.target.value); }} required>
                           <option value="">Select teacher</option>
                           {teachers.map((item) => <option key={item.user_id} value={item.user_id}>{item.full_name || item.email || item.user_id}</option>)}
                         </select>
