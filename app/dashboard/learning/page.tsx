@@ -118,17 +118,18 @@ export default function LearningPage() {
 
   const canCreateHomework = ["operator","admin","teacher"].includes(role) && classes.length > 0;
   const [openingFile, setOpeningFile] = useState("");
+  const [downloadUrl, setDownloadUrl] = useState("");
   const openMaterial = async (item: Material) => {
     setOpeningFile(item.id); setMessage("");
     try {
       const db = createClient();
       if (item.file_url.startsWith("https://") || item.file_url.startsWith("http://")) {
-        window.open(item.file_url, "_blank", "noopener,noreferrer");
+        setDownloadUrl(item.file_url);
         return;
       }
       const { data, error } = await db.storage.from("kvsync-study-materials").createSignedUrl(item.file_url, 60);
       if (error || !data?.signedUrl) throw new Error("Secure download could not be created. Check class access and the stored file path.");
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      setDownloadUrl(data.signedUrl);
     } catch (e) { setMessage(e instanceof Error ? e.message : "Unable to open resource."); }
     finally { setOpeningFile(""); }
   };
@@ -150,6 +151,7 @@ export default function LearningPage() {
         <label>Deadline<input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} style={inputStyle}/></label>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="submit" disabled={saving || !classes.length}>{saving ? "Saving…" : editingId ? "Save changes" : "Publish homework"}</button><button type="button" onClick={() => setEditorOpen(false)}>Cancel</button></div>
       </form>}
+      {downloadUrl && <div className="learning-inline-message">Your secure link is ready. <a href={downloadUrl} target="_blank" rel="noreferrer">Open resource ↗</a><button type="button" onClick={() => setDownloadUrl("")}>Dismiss</button></div>}
       {busy ? <div className="learning-message">Loading learning resources securely…</div> : message && !homework.length && !materials.length ? <div className="learning-message">{message}</div> : <>
         <div className="learning-grid">
           <article className="learning-panel"><div className="learning-panel-head"><span><BookOpen size={18}/></span><div><h2>Homework</h2><p>{homework.length} item(s) available</p></div></div>
