@@ -105,7 +105,7 @@ export default function Home() {
                 <div className="input-wrap"><Mail size={17} /><input id="email" type="email" autoComplete="username" placeholder="username@kvsync.pro" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
                 <div className="label-row"><label htmlFor="password">Password</label><span className="managed-note"><LockKeyhole size={12} /> PRIVATE ACCESS</span></div>
                 <div className="input-wrap"><LockKeyhole size={17} /><input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /><button className="reveal-button" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
-                {message && <div className="form-message" role="alert">{message}</div>}
+                {message && <div className="form-message" role="alert" aria-live="assertive">{message}</div>}
                 <button className="submit-button" type="submit" disabled={busy}>{busy ? "Verifying account…" : "Enter workspace"} <ArrowRight size={17} /></button>
               </form>
               <div className="form-footer"><ShieldCheck size={15} /><span>Protected sign-in · No public account registration</span></div>
