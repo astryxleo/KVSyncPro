@@ -209,14 +209,14 @@ export default function LearningPage() {
   const canEditHomework = (item: Homework) => ["operator","admin"].includes(role) || (role === "teacher" && item.posted_by === userId);
 
   return <main className="learning-page">
-    <header><a className="learning-brand" href="/dashboard">KVSync <em>Pro</em></a><button onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button></header>
+    <header><a className="learning-brand" href="/dashboard">KVSync <em>Pro</em></a><button type="button" onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button></header>
     <section>
       <div className="learning-eyebrow">PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div>
-      <div className="learning-title-row"><div><h1>Learning hub</h1><p>Homework and study resources available to your signed-in role.</p></div><button className="learning-refresh" onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
+      <div className="learning-title-row"><div><h1>Learning hub</h1><p>Homework and study resources available to your signed-in role.</p></div><button type="button" className="learning-refresh" onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
       <div className="learning-verified"><ShieldCheck size={18}/><span><b>Role-checked content</b><small>{role ? role.replaceAll("_"," ") : "Checking role"} · Database row policies remain active</small></span></div>
       {(canCreateHomework || canUploadMaterial) && <div style={{display:"flex",justifyContent:"flex-end",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
-        {canCreateHomework && <button className="learning-refresh" onClick={startNew}><Plus size={15}/> Add homework</button>}
-        {canUploadMaterial && <button className="learning-refresh" onClick={() => { setMaterialEditorOpen(true); setMessage(""); }}><Upload size={15}/> Upload study material</button>}
+        {canCreateHomework && <button type="button" className="learning-refresh" onClick={startNew}><Plus size={15}/> Add homework</button>}
+        {canUploadMaterial && <button type="button" className="learning-refresh" onClick={() => { setMaterialEditorOpen(true); setMessage(""); }}><Upload size={15}/> Upload study material</button>}
       </div>}
       {editorOpen && <form onSubmit={saveHomework} className="learning-panel" style={{display:"grid",gap:12,marginBottom:18}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><h2>{editingId ? "Edit homework" : "Create homework"}</h2><button type="button" onClick={() => setEditorOpen(false)} aria-label="Close editor"><X size={18}/></button></div>
