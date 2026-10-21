@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity, ArrowDownLeft, ArrowRight, Bell, BookOpen, CalendarCheck2, CheckCircle2,
   ChevronRight, CircleHelp, ClipboardCheck, FileText, GraduationCap, LayoutDashboard,
-  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu, X
+  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
@@ -113,7 +113,7 @@ export default function DashboardPage() {
         <nav className="dash-nav" aria-label="Workspace navigation">
           {visibleModules.map((item) => {
             const Icon = item.icon;
-            return <button key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setActive(item.label); setMobileOpen(false); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
+            return <button key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setMobileOpen(false); if (item.label === "Attendance") { router.push("/dashboard/attendance"); return; } setActive(item.label); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
           })}
         </nav>
         <div className="dash-sidebar-bottom"><div className="dash-secure-note"><span className="secure-dot" /><span><strong>Protected workspace</strong><small>Access checked against assigned role</small></span></div><button className="dash-signout" onClick={() => void signOut()} disabled={signingOut}><LogOut size={16} />{signingOut ? "Signing out…" : "Sign out"}</button></div>
