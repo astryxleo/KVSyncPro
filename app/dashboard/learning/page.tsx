@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, FileText, RefreshCw, ShieldCheck, Plus, Pencil, X } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, RefreshCw, ShieldCheck, Plus, Pencil, X, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 type Homework = { id: string; class_id: string; title: string; subject: string; description: string | null; deadline: string | null; created_at: string; posted_by?: string };
@@ -117,6 +117,21 @@ export default function LearningPage() {
   };
 
   const canCreateHomework = ["operator","admin","teacher"].includes(role) && classes.length > 0;
+  const [openingFile, setOpeningFile] = useState("");
+  const openMaterial = async (item: Material) => {
+    setOpeningFile(item.id); setMessage("");
+    try {
+      const db = createClient();
+      if (item.file_url.startsWith("https://") || item.file_url.startsWith("http://")) {
+        window.open(item.file_url, "_blank", "noopener,noreferrer");
+        return;
+      }
+      const { data, error } = await db.storage.from("kvsync-study-materials").createSignedUrl(item.file_url, 60);
+      if (error || !data?.signedUrl) throw new Error("Secure download could not be created. Check class access and the stored file path.");
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (e) { setMessage(e instanceof Error ? e.message : "Unable to open resource."); }
+    finally { setOpeningFile(""); }
+  };
   const canEditHomework = (item: Homework) => ["operator","admin"].includes(role) || (role === "teacher" && item.posted_by === userId);
 
   return <main className="learning-page">
@@ -141,7 +156,7 @@ export default function LearningPage() {
             {homework.length ? homework.map(item => <div className="learning-item" key={item.id}><div><span className="learning-subject">{item.subject || "General"}</span><h3>{item.title}</h3>{item.description && <p>{item.description}</p>}</div><div style={{display:"grid",justifyItems:"end",gap:8}}><small>{item.deadline ? "Due "+new Date(item.deadline).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) : "No deadline listed"}</small>{canEditHomework(item) && <button type="button" onClick={() => startEdit(item)} aria-label={"Edit "+item.title}><Pencil size={14}/> Edit</button>}</div></div>) : <p className="learning-empty">No homework items are visible to this account.</p>}
           </article>
           <article className="learning-panel"><div className="learning-panel-head"><span><FileText size={18}/></span><div><h2>Study materials</h2><p>{materials.length} resource(s) available</p></div></div>
-            {materials.length ? materials.map(item => <div className="learning-item material" key={item.id}><div><span className="learning-subject">{item.subject || "General"}{item.file_type ? " · "+item.file_type : ""}</span><h3>{item.title}</h3></div><a href={item.file_url} target="_blank" rel="noreferrer">Open resource ↗</a></div>) : <p className="learning-empty">No study materials are visible to this account.</p>}
+            {materials.length ? materials.map(item => <div className="learning-item material" key={item.id}><div><span className="learning-subject">{item.subject || "General"}{item.file_type ? " · "+item.file_type : ""}</span><h3>{item.title}</h3></div><button type="button" onClick={() => void openMaterial(item)} disabled={openingFile === item.id}><Download size={14}/>{openingFile === item.id ? "Preparing…" : "Open securely"}</button></div>) : <p className="learning-empty">No study materials are visible to this account.</p>}
           </article>
         </div>
         {message && <div className="learning-inline-message">{message}</div>}
