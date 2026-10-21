@@ -169,3 +169,15 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .classes-assignment-form select{flex:1;min-width:0;height:35px;padding:0 8px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#0b0c0f;color:#eee8d8;font-size:10px}
 .classes-assignment-form button{padding:0 10px;border:1px solid rgba(215,180,106,.3);border-radius:7px;background:rgba(215,180,106,.08);color:#e0c37f;font-size:10px;cursor:pointer}
 .classes-assignment-form button:disabled,.classes-assigned-teacher button:disabled{opacity:.5;cursor:wait}
+
+
+.classes-subject-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.classes-subject-row>span{display:grid;gap:3px;min-width:0}
+.classes-subject-row b{color:#e0d2ad;font-size:10px;font-weight:500}
+.classes-subject-row small{color:#8f9097;font-size:9px;overflow-wrap:anywhere}
+.classes-subject-row button{flex-shrink:0;padding:5px 7px;border:1px solid rgba(255,120,120,.2);border-radius:6px;background:transparent;color:#d99b9b;font-size:9px;cursor:pointer}
+.classes-subject-form{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.classes-subject-form input,.classes-subject-form select{width:100%;min-width:0;height:34px;padding:0 8px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#0b0c0f;color:#eee8d8;font-size:10px}
+.classes-subject-form button{grid-column:1/-1;min-height:33px;border:1px solid rgba(215,180,106,.25);border-radius:7px;background:rgba(215,180,106,.06);color:#dfc17b;font-size:10px;cursor:pointer}
+.classes-subject-form button:disabled{opacity:.5;cursor:wait}
+@media(max-width:760px){.classes-subject-form{grid-template-columns:1fr}.classes-subject-form button{grid-column:auto}}
