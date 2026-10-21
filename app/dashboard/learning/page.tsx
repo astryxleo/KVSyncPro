@@ -15,6 +15,7 @@ export default function LearningPage() {
   const [homework, setHomework] = useState<Homework[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [uploadableClassIds, setUploadableClassIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -71,7 +72,9 @@ export default function LearningPage() {
             db.from("class_subject_teachers").select("class_id").eq("teacher_id", auth.user.id),
           ]);
           if (wholeClass.error || subjectClass.error) throw new Error("Could not verify teaching assignments.");
-          const ids = [...new Set([...(wholeClass.data ?? []), ...(subjectClass.data ?? [])].map((r: {class_id:string}) => r.class_id))];
+          const wholeClassIds = [...new Set((wholeClass.data ?? []).map((r: {class_id:string}) => r.class_id))];
+          setUploadableClassIds(wholeClassIds);
+          const ids = [...new Set([...wholeClassIds, ...(subjectClass.data ?? []).map((r: {class_id:string}) => r.class_id)])];
           if (ids.length) {
             const { data, error } = await db.from("classes").select("id,grade,section").in("id", ids).order("grade").order("section");
             if (error) throw new Error("Assigned classes could not be loaded.");
@@ -81,6 +84,7 @@ export default function LearningPage() {
           const { data, error } = await db.from("classes").select("id,grade,section").order("grade").order("section").limit(200);
           if (error) throw new Error("Classes could not be loaded for content management.");
           classRows = (data ?? []) as SchoolClass[];
+          setUploadableClassIds(classRows.map(c => c.id));
         }
         setClasses(classRows);
         if (classRows.length) setClassId(current => current || classRows[0].id);
@@ -121,7 +125,7 @@ export default function LearningPage() {
   };
 
   const canCreateHomework = ["operator","admin","teacher"].includes(role) && classes.length > 0;
-  const canUploadMaterial = ["operator","admin","teacher"].includes(role) && classes.length > 0;
+  const canUploadMaterial = ["operator","admin","teacher"].includes(role) && uploadableClassIds.length > 0;
   const uploadMaterial = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!classId || !materialTitle.trim() || !materialSubject.trim() || !materialFile) {
@@ -220,7 +224,7 @@ export default function LearningPage() {
       </form>}
       {materialEditorOpen && <form onSubmit={uploadMaterial} className="learning-panel" style={{display:"grid",gap:12,marginBottom:18}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><h2>Upload study material</h2><button type="button" onClick={() => setMaterialEditorOpen(false)} aria-label="Close upload form"><X size={18}/></button></div>
-        <label>Class<select required value={classId} onChange={e => setClassId(e.target.value)} style={inputStyle}><option value="">Choose class</option>{classes.map(c => <option key={c.id} value={c.id}>Class {c.grade}-{c.section}</option>)}</select></label>
+        <label>Class<select required value={uploadableClassIds.includes(classId) ? classId : ""} onChange={e => setClassId(e.target.value)} style={inputStyle}><option value="">Choose class</option>{classes.filter(c => uploadableClassIds.includes(c.id)).map(c => <option key={c.id} value={c.id}>Class {c.grade}-{c.section}</option>)}</select></label>
         <label>Subject<input required maxLength={80} value={materialSubject} onChange={e => setMaterialSubject(e.target.value)} style={inputStyle} placeholder="e.g. Science"/></label>
         <label>Resource title<input required maxLength={160} value={materialTitle} onChange={e => setMaterialTitle(e.target.value)} style={inputStyle} placeholder="e.g. Chapter 4 notes"/></label>
         <label>File (PDF, JPG, PNG, WEBP, DOCX, PPTX, XLSX; max 25 MB)<input required type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.pptx,.xlsx" onChange={e => setMaterialFile(e.target.files?.[0] ?? null)} style={inputStyle}/></label>
@@ -239,7 +243,7 @@ export default function LearningPage() {
         </div>
         {message && <div className="learning-inline-message">{message}</div>}
       </>}
-      <p className="learning-caveat">Homework and study-material publishing are available to authorized staff. Study files stay in private storage and are opened through short-lived signed links.</p>
+      <p className="learning-caveat">Homework and study-material publishing are available to authorized staff. Study files stay in private storage and are opened through short-lived signed links. Upload permissions are limited to classes the account can manage directly.</p>
     </section>
   </main>;
 }
