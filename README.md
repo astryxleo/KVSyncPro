@@ -22,7 +22,7 @@ Never place a Supabase service-role key or secret key in a `NEXT_PUBLIC_*` varia
 - Role lookup from `public.user_roles`; access is denied when role verification fails or no role is assigned.
 - Role-aware dashboard navigation for Operator, Administrator, Teacher, Student, System Moderator, Data & Content Manager, Tester, and Support Manager.
 - Account provisioning through the `manage-users` Edge Function. Internal IDs use the `@kvsync.pro` suffix; account creation does not send email invitations and returns a generated temporary password once.
-- Attendance records, class directory and teaching assignments, timetable, learning hub, announcements, community feed, and moderation queues.
+- Class-scoped attendance marking/editing for authorized teachers and administrators, student read-only attendance, class directory and teaching assignments, timetable, learning hub, announcements, community feed, and moderation queues.
 - Content management with authorized announcement publishing.
 - Bug-report review and support inbox with database-policy-checked status updates.
 - System activity view for privileged moderation events; testers see their own quality reports.
