@@ -158,3 +158,14 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .classes-create-form input:focus,.classes-create-form select:focus{border-color:rgba(215,180,106,.5)}
 .classes-create-form>button:disabled{opacity:.5;cursor:wait}
 @media(max-width:760px){.classes-create-form{grid-template-columns:1fr 1fr}.classes-create-form label:nth-child(3){grid-column:1/-1}.classes-create-form>button{grid-column:1/-1;width:100%}}
+
+
+.classes-assignment{margin-top:15px;padding:12px;border:1px solid rgba(215,180,106,.16);border-radius:10px;background:rgba(215,180,106,.035)}
+.classes-assignment-heading{margin-bottom:9px;color:#aaa89f;font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+.classes-assigned-teacher{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#e4d8b6;font-size:11px}
+.classes-assigned-teacher span{min-width:0;overflow-wrap:anywhere}
+.classes-assigned-teacher button{flex-shrink:0;padding:6px 8px;border:1px solid rgba(255,120,120,.25);border-radius:7px;background:rgba(255,100,100,.06);color:#e7a0a0;font-size:10px;cursor:pointer}
+.classes-assignment-form{display:flex;gap:8px}
+.classes-assignment-form select{flex:1;min-width:0;height:35px;padding:0 8px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#0b0c0f;color:#eee8d8;font-size:10px}
+.classes-assignment-form button{padding:0 10px;border:1px solid rgba(215,180,106,.3);border-radius:7px;background:rgba(215,180,106,.08);color:#e0c37f;font-size:10px;cursor:pointer}
+.classes-assignment-form button:disabled,.classes-assigned-teacher button:disabled{opacity:.5;cursor:wait}
