@@ -356,7 +356,7 @@ export default function ClassesPage() {
     <main className="classes-page">
       <header>
         <a className="classes-brand" href="/dashboard">KVSync <em>Pro</em></a>
-        <button onClick={() => router.push("/dashboard")}><ArrowLeft size={15} /> Overview</button>
+        <button type="button" onClick={() => router.push("/dashboard")}><ArrowLeft size={15} /> Overview</button>
       </header>
       <section>
         <div className="classes-eyebrow">PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div>
@@ -365,9 +365,9 @@ export default function ClassesPage() {
             <h1>Classes &amp; people</h1>
             <p>Class directory and student roster visible to your verified school role.</p>
           </div>
-          {(role === "operator" || role === "admin") && <button className="classes-provision-link" onClick={exportRoster} disabled={busy}><Download size={14} /> Export roster CSV</button>}
-          {(role === "operator" || role === "admin" || role === "data_content_manager") && <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>}
-          <button onClick={() => void load()} disabled={busy}><RefreshCw size={14} /> Refresh</button>
+          {(role === "operator" || role === "admin") && <button type="button" className="classes-provision-link" onClick={exportRoster} disabled={busy}><Download size={14} /> Export roster CSV</button>}
+          {(role === "operator" || role === "admin" || role === "data_content_manager") && <button type="button" className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>}
+          <button type="button" onClick={() => void load()} disabled={busy}><RefreshCw size={14} /> Refresh</button>
         </div>
         <div className="classes-verified">
           <ShieldCheck size={18} />
@@ -375,7 +375,7 @@ export default function ClassesPage() {
         </div>
         {(role === "operator" || role === "admin") && (
           <div className="classes-create-area">
-            <button className="classes-create-toggle" onClick={() => { setShowCreate((value) => !value); setMessage(""); }}>
+            <button type="button" className="classes-create-toggle" onClick={() => { setShowCreate((value) => !value); setMessage(""); }}>
               <Plus size={15} /> {showCreate ? "Cancel" : "Create class"}
             </button>
             {showCreate && (
