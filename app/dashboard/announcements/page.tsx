@@ -34,7 +34,7 @@ export default function AnnouncementsPage() {
       }
       let query = db.from("updates").select("id,title,content,target_role,class_id,created_at").order("created_at",{ascending:false}).limit(100);
       if (currentRole === "student") {
-        query = query.or(`target_role.is.null,target_role.eq.student,class_id.eq.${classId}`);
+        query = query.or(`target_role.eq.all,target_role.eq.student,and(target_role.eq.class,class_id.eq.${classId})`);
       }
       const { data, error } = await query;
       if (error) throw new Error("Announcements could not be loaded. Check database permissions.");
