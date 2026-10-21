@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, FileText, RefreshCw, ShieldCheck, Plus, Pencil, X, Download } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, RefreshCw, ShieldCheck, Plus, Pencil, X, Download, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 type Homework = { id: string; class_id: string; title: string; subject: string; description: string | null; deadline: string | null; created_at: string; posted_by?: string };
@@ -27,6 +27,10 @@ export default function LearningPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [materialEditorOpen, setMaterialEditorOpen] = useState(false);
+  const [materialTitle, setMaterialTitle] = useState("");
+  const [materialSubject, setMaterialSubject] = useState("");
+  const [materialFile, setMaterialFile] = useState<File | null>(null);
 
   const load = useCallback(async () => {
     setBusy(true); setMessage("");
@@ -117,15 +121,75 @@ export default function LearningPage() {
   };
 
   const canCreateHomework = ["operator","admin","teacher"].includes(role) && classes.length > 0;
+  const canUploadMaterial = ["operator","admin","teacher"].includes(role) && classes.length > 0;
+  const uploadMaterial = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!classId || !materialTitle.trim() || !materialSubject.trim() || !materialFile) {
+      setMessage("Choose a class and file, and enter the material title and subject.");
+      return;
+    }
+    const allowedTypes = new Set([
+      "application/pdf", "image/jpeg", "image/png", "image/webp",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ]);
+    if (!allowedTypes.has(materialFile.type)) {
+      setMessage("Unsupported file type. Upload PDF, JPG, PNG, WEBP, DOCX, PPTX or XLSX.");
+      return;
+    }
+    if (materialFile.size > 25 * 1024 * 1024) {
+      setMessage("File is too large. Maximum size is 25 MB.");
+      return;
+    }
+    setSaving(true);
+    setMessage("");
+    const db = createClient();
+    let uploadedPath = "";
+    try {
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) throw new Error("Your session expired. Sign in again.");
+      const safeName = materialFile.name.normalize("NFKD").replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^\.+/, "").slice(-120) || "resource";
+      uploadedPath = classId + "/" + crypto.randomUUID() + "-" + safeName;
+      const { error: uploadError } = await db.storage.from("kvsync-study-materials").upload(uploadedPath, materialFile, {
+        contentType: materialFile.type,
+        cacheControl: "60",
+        upsert: false,
+      });
+      if (uploadError) throw new Error("File upload failed: " + uploadError.message);
+      const { error: rowError } = await db.from("study_materials").insert({
+        class_id: classId,
+        title: materialTitle.trim(),
+        subject: materialSubject.trim(),
+        file_url: uploadedPath,
+        file_type: materialFile.type,
+        uploaded_by: auth.user.id,
+      });
+      if (rowError) {
+        await db.storage.from("kvsync-study-materials").remove([uploadedPath]);
+        uploadedPath = "";
+        throw new Error("File metadata could not be saved: " + rowError.message);
+      }
+      setMaterialEditorOpen(false);
+      setMaterialTitle("");
+      setMaterialSubject("");
+      setMaterialFile(null);
+      setMessage("Study material uploaded successfully.");
+      await load();
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Unable to upload study material.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const [openingFile, setOpeningFile] = useState("");
   const [downloadUrl, setDownloadUrl] = useState("");
   const openMaterial = async (item: Material) => {
     setOpeningFile(item.id); setMessage("");
     try {
       const db = createClient();
-      if (item.file_url.startsWith("https://") || item.file_url.startsWith("http://")) {
-        setDownloadUrl(item.file_url);
-        return;
+      if (/^https?:\/\//i.test(item.file_url) || item.file_url.startsWith("/") || item.file_url.includes("..")) {
+        throw new Error("This resource has an invalid storage path. Ask staff to re-upload it securely.");
       }
       const { data, error } = await db.storage.from("kvsync-study-materials").createSignedUrl(item.file_url, 60);
       if (error || !data?.signedUrl) throw new Error("Secure download could not be created. Check class access and the stored file path.");
@@ -141,7 +205,10 @@ export default function LearningPage() {
       <div className="learning-eyebrow">PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div>
       <div className="learning-title-row"><div><h1>Learning hub</h1><p>Homework and study resources available to your signed-in role.</p></div><button className="learning-refresh" onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
       <div className="learning-verified"><ShieldCheck size={18}/><span><b>Role-checked content</b><small>{role ? role.replaceAll("_"," ") : "Checking role"} · Database row policies remain active</small></span></div>
-      {canCreateHomework && <div style={{display:"flex",justifyContent:"flex-end",margin:"16px 0"}}><button className="learning-refresh" onClick={startNew}><Plus size={15}/> Add homework</button></div>}
+      {(canCreateHomework || canUploadMaterial) && <div style={{display:"flex",justifyContent:"flex-end",gap:10,flexWrap:"wrap",margin:"16px 0"}}>
+        {canCreateHomework && <button className="learning-refresh" onClick={startNew}><Plus size={15}/> Add homework</button>}
+        {canUploadMaterial && <button className="learning-refresh" onClick={() => { setMaterialEditorOpen(true); setMessage(""); }}><Upload size={15}/> Upload study material</button>}
+      </div>}
       {editorOpen && <form onSubmit={saveHomework} className="learning-panel" style={{display:"grid",gap:12,marginBottom:18}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><h2>{editingId ? "Edit homework" : "Create homework"}</h2><button type="button" onClick={() => setEditorOpen(false)} aria-label="Close editor"><X size={18}/></button></div>
         <label>Class<select required value={classId} onChange={e => setClassId(e.target.value)} style={inputStyle}><option value="">Choose class</option>{classes.map(c => <option key={c.id} value={c.id}>Class {c.grade}-{c.section}</option>)}</select></label>
@@ -150,6 +217,15 @@ export default function LearningPage() {
         <label>Description<textarea maxLength={5000} value={description} onChange={e => setDescription(e.target.value)} style={{...inputStyle,minHeight:100,resize:"vertical"}} placeholder="Instructions or details (optional)"/></label>
         <label>Deadline<input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} style={inputStyle}/></label>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="submit" disabled={saving || !classes.length}>{saving ? "Saving…" : editingId ? "Save changes" : "Publish homework"}</button><button type="button" onClick={() => setEditorOpen(false)}>Cancel</button></div>
+      </form>}
+      {materialEditorOpen && <form onSubmit={uploadMaterial} className="learning-panel" style={{display:"grid",gap:12,marginBottom:18}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><h2>Upload study material</h2><button type="button" onClick={() => setMaterialEditorOpen(false)} aria-label="Close upload form"><X size={18}/></button></div>
+        <label>Class<select required value={classId} onChange={e => setClassId(e.target.value)} style={inputStyle}><option value="">Choose class</option>{classes.map(c => <option key={c.id} value={c.id}>Class {c.grade}-{c.section}</option>)}</select></label>
+        <label>Subject<input required maxLength={80} value={materialSubject} onChange={e => setMaterialSubject(e.target.value)} style={inputStyle} placeholder="e.g. Science"/></label>
+        <label>Resource title<input required maxLength={160} value={materialTitle} onChange={e => setMaterialTitle(e.target.value)} style={inputStyle} placeholder="e.g. Chapter 4 notes"/></label>
+        <label>File (PDF, JPG, PNG, WEBP, DOCX, PPTX, XLSX; max 25 MB)<input required type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.pptx,.xlsx" onChange={e => setMaterialFile(e.target.files?.[0] ?? null)} style={inputStyle}/></label>
+        {materialFile && <small>{materialFile.name} · {(materialFile.size / (1024 * 1024)).toFixed(2)} MB</small>}
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="submit" disabled={saving || !classes.length}>{saving ? "Uploading…" : "Upload resource"}</button><button type="button" onClick={() => setMaterialEditorOpen(false)}>Cancel</button></div>
       </form>}
       {downloadUrl && <div className="learning-inline-message">Your secure link is ready. <a href={downloadUrl} target="_blank" rel="noreferrer">Open resource ↗</a><button type="button" onClick={() => setDownloadUrl("")}>Dismiss</button></div>}
       {busy ? <div className="learning-message">Loading learning resources securely…</div> : message && !homework.length && !materials.length ? <div className="learning-message">{message}</div> : <>
@@ -163,7 +239,7 @@ export default function LearningPage() {
         </div>
         {message && <div className="learning-inline-message">{message}</div>}
       </>}
-      <p className="learning-caveat">Homework creation and editing are enabled for authorized staff. Study-material upload and secure signed-download workflows remain separate until storage integration is completed.</p>
+      <p className="learning-caveat">Homework and study-material publishing are available to authorized staff. Study files stay in private storage and are opened through short-lived signed links.</p>
     </section>
   </main>;
 }
