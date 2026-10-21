@@ -238,7 +238,7 @@ export default function LearningPage() {
       </form>}
       {downloadUrl && <div className="learning-inline-message">Your secure link is ready. <a href={downloadUrl} target="_blank" rel="noreferrer">Open resource ↗</a><button type="button" onClick={() => setDownloadUrl("")}>Dismiss</button></div>}
       <label style={{display:"block",marginBottom:14}}>Search homework and resources<input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="Search title, subject, or description…" style={{...inputStyle,marginTop:7}} aria-label="Search learning resources"/></label>
-      {busy ? <div className="learning-message">Loading learning resources securely…</div> : message && !homework.length && !materials.length ? <div className="learning-message">{message}</div> : <>
+      {busy ? <div className="learning-message">Loading learning resources securely…</div> : message && !homework.length && !materials.length ? <div className="learning-message" role="status" aria-live="polite">{message}</div> : <>
         <div className="learning-grid">
           <article className="learning-panel"><div className="learning-panel-head"><span><BookOpen size={18}/></span><div><h2>Homework</h2><p>{filteredHomework.length} item(s) match</p></div></div>
             {filteredHomework.length ? filteredHomework.map(item => <div className="learning-item" key={item.id}><div><span className="learning-subject">{item.subject || "General"}</span><h3>{item.title}</h3>{item.description && <p>{item.description}</p>}</div><div style={{display:"grid",justifyItems:"end",gap:8}}><small>{item.deadline ? "Due "+new Date(item.deadline).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) : "No deadline listed"}</small>{canEditHomework(item) && <button type="button" onClick={() => startEdit(item)} aria-label={"Edit "+item.title}><Pencil size={14}/> Edit</button>}</div></div>) : <p className="learning-empty">{searchText ? "No homework matches your search." : "No homework items are visible to this account."}</p>}
@@ -247,7 +247,7 @@ export default function LearningPage() {
             {filteredMaterials.length ? filteredMaterials.map(item => <div className="learning-item material" key={item.id}><div><span className="learning-subject">{item.subject || "General"}{item.file_type ? " · "+item.file_type : ""}</span><h3>{item.title}</h3></div><button type="button" onClick={() => void openMaterial(item)} disabled={openingFile === item.id}><Download size={14}/>{openingFile === item.id ? "Preparing…" : "Open securely"}</button></div>) : <p className="learning-empty">{searchText ? "No study materials match your search." : "No study materials are visible to this account."}</p>}
           </article>
         </div>
-        {message && <div className="learning-inline-message">{message}</div>}
+        {message && <div className="learning-inline-message" role="status" aria-live="polite">{message}</div>}
       </>}
       <p className="learning-caveat">Homework and study-material publishing are available to authorized staff. Study files stay in private storage and are opened through short-lived signed links. Upload permissions are limited to classes the account can manage directly.</p>
     </section>
