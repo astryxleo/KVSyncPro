@@ -366,7 +366,7 @@ export default function ClassesPage() {
             <p>Class directory and student roster visible to your verified school role.</p>
           </div>
           {(role === "operator" || role === "admin") && <button className="classes-provision-link" onClick={exportRoster} disabled={busy}><Download size={14} /> Export roster CSV</button>}
-          {(role === "operator" || role === "admin" || role === "data_content_manager") && <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>
+          {(role === "operator" || role === "admin" || role === "data_content_manager") && <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>}
           <button onClick={() => void load()} disabled={busy}><RefreshCw size={14} /> Refresh</button>
         </div>
         <div className="classes-verified">
