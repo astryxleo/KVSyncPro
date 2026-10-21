@@ -244,3 +244,23 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .attendance-roster-footer{padding:12px 16px;color:#888992;font-size:9px;line-height:1.7;background:#121316}
 .attendance-status-message{margin-top:16px;min-height:auto;border-color:rgba(215,180,106,.18)}
 @media(max-width:760px){.attendance-controls{grid-template-columns:1fr}.attendance-roster-heading{align-items:flex-start;flex-direction:column}.attendance-roster-heading button{width:100%}.attendance-roster-row{grid-template-columns:minmax(0,1fr) minmax(120px,.8fr);gap:9px;padding:13px}.attendance-roster-row input{grid-column:1/-1}.attendance-existing{grid-column:1/-1}}
+
+
+/* Connected workflow forms */
+.community-compose,.announcements-compose,.timetable-manage-form{display:grid;gap:14px;margin:18px 0 22px;padding:20px;border:1px solid rgba(215,180,106,.22);border-radius:16px;background:linear-gradient(145deg,rgba(24,24,27,.96),rgba(13,14,17,.98));box-shadow:0 16px 42px rgba(0,0,0,.16)}
+.community-compose label,.announcements-compose label,.timetable-manage-form label{display:grid;gap:7px;color:#dedde0;font-size:12px;font-weight:600;min-width:0}
+.community-compose textarea,.announcements-compose textarea,.announcements-compose input,.announcements-compose select,.timetable-manage-form input,.timetable-manage-form select{width:100%;min-width:0;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#0c0d10;color:#f4f1e9;padding:11px 12px;font:inherit;font-size:13px;outline:none}
+.community-compose textarea:focus,.announcements-compose textarea:focus,.announcements-compose input:focus,.announcements-compose select:focus,.timetable-manage-form input:focus,.timetable-manage-form select:focus{border-color:rgba(215,180,106,.72);box-shadow:0 0 0 3px rgba(215,180,106,.08)}
+.community-compose-footer,.announcements-compose-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.community-compose-footer small,.announcements-compose>div p,.timetable-manage-form>div p{color:#92939b;font-size:11px;line-height:1.6;margin:4px 0 0}
+.community-compose-footer button,.announcements-compose>button,.timetable-manage-form>button,.timetable-delete{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(215,180,106,.48);border-radius:10px;background:linear-gradient(110deg,#c5a154,#e1c47d);color:#17130b;padding:10px 14px;font-weight:750;font-size:12px;cursor:pointer}
+.community-compose-footer button:disabled,.announcements-compose>button:disabled,.timetable-manage-form>button:disabled,.timetable-delete:disabled{opacity:.55;cursor:not-allowed}
+.announcements-compose h2,.timetable-manage-form h2{display:flex;align-items:center;gap:8px;margin:0;font-size:17px;font-weight:650;color:#f0dba9}
+.announcements-compose-row{align-items:end;justify-content:flex-start}
+.announcements-compose-row label{flex:1;min-width:min(100%,220px)}
+.announcements-feedback,.timetable-feedback{padding:11px 13px;border:1px solid rgba(215,180,106,.22);border-radius:10px;background:rgba(215,180,106,.06);color:#ead8a9;font-size:12px;line-height:1.6}
+.timetable-manage-form{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}
+.timetable-manage-form>div{grid-column:1/-1}
+.timetable-manage-form>label{display:grid;gap:7px;color:#dedde0;font-size:12px;font-weight:600}
+.timetable-period .timetable-delete{background:rgba(156,61,61,.12);color:#f0b6b6;border-color:rgba(225,112,112,.28);padding:7px 10px}
+@media(max-width:600px){.community-compose,.announcements-compose,.timetable-manage-form{padding:15px}.timetable-manage-form{grid-template-columns:1fr}.timetable-manage-form>div{grid-column:auto}.community-compose-footer{align-items:stretch}.community-compose-footer button,.announcements-compose>button,.timetable-manage-form>button{width:100%}}
