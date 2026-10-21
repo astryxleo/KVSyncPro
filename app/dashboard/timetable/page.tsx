@@ -52,7 +52,7 @@ export default function TimetablePage() {
           setClasses((assignedClasses ?? []) as SchoolClass[]);
         } else setClasses([]);
       } else setClasses([]);
-      let classId = "";
+
       if (currentRole === "student") {
         const { data: student, error } = await db.from("students").select("class_id").eq("user_id", auth.user.id).maybeSingle();
         if (error) throw new Error("Could not verify your class assignment.");
