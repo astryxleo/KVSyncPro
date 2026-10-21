@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, RefreshCw, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -13,7 +13,7 @@ export default function AttendancePage() {
   const [message, setMessage] = useState("Loading attendance securely…");
   const [role, setRole] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setBusy(true); setMessage("");
     try {
       const db = createClient();
@@ -38,7 +38,7 @@ export default function AttendancePage() {
       if (!(data ?? []).length) setMessage("No attendance records are available to your account yet.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Unable to load attendance."); }
     finally { setBusy(false); }
-  }
-  useEffect(() => { void load(); }, []);
+  }, [router]);
+  useEffect(() => { void load(); }, [load]);
   return <main className="attendance-page"><header><a href="/dashboard" className="attendance-logo">KVSync <em>Pro</em></a><button onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button></header><section><div className="attendance-eyebrow">PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</div><h1>Attendance records</h1><p className="attendance-intro">Read-only attendance view. Supabase Row Level Security controls which records your account can see.</p><div className="attendance-verified"><ShieldCheck size={18}/><span><b>Role verified</b><small>{role ? role.replaceAll("_"," ") : "Checking your assigned role"}</small></span><button onClick={() => void load()} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>{busy ? <div className="attendance-message">{message}</div> : message ? <div className="attendance-message">{message}</div> : <div className="attendance-records"><div className="attendance-record-head"><span>Date</span><span>Status</span><span>Class</span><span>Student</span><span>Note</span></div>{rows.map((r) => <div className="attendance-record" key={r.id}><span>{new Date(r.attendance_date+"T12:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</span><span className={"attendance-chip "+r.status.toLowerCase()}>{r.status}</span><code>{r.class_id.slice(0,8)}…</code><code>{r.student_id.slice(0,8)}…</code><span>{r.note || "—"}</span></div>)}<footer>{rows.length} record(s) loaded</footer></div>}<p className="attendance-caveat">Marking and editing are intentionally disabled until class-roster and status-value checks are completed end-to-end.</p></section></main>;
 }
