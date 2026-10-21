@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Building2, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Building2, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 type SchoolRole = "operator" | "admin" | "teacher";
@@ -19,6 +19,11 @@ export default function ClassesPage() {
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newGrade, setNewGrade] = useState("6");
+  const [newSection, setNewSection] = useState("A");
+  const [newRoom, setNewRoom] = useState("");
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -107,6 +112,53 @@ export default function ClassesPage() {
     }
   }, [router]);
 
+  const createClass = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (role !== "operator" && role !== "admin") {
+      setMessage("Only Operator or Admin can create classes.");
+      return;
+    }
+    const grade = Number(newGrade);
+    const section = newSection.trim().toUpperCase();
+    const room = newRoom.trim();
+    if (!Number.isInteger(grade) || grade < 1 || grade > 12 || !["A", "B", "C", "D"].includes(section)) {
+      setMessage("Choose a grade from 1–12 and a section from A–D.");
+      return;
+    }
+    setSaving(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) {
+        router.replace("/");
+        return;
+      }
+      const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
+      if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
+        throw new Error("Class creation is restricted to Operator and Admin accounts.");
+      }
+      const { error } = await db.from("classes").insert({
+        grade,
+        section,
+        room_number: room || null,
+      });
+      if (error) {
+        if (error.code === "23505") throw new Error(`Class ${grade}${section} already exists.`);
+        if (error.code === "42501") throw new Error("Database permissions do not allow this class creation.");
+        throw new Error("Could not create the class. Check the details and try again.");
+      }
+      setShowCreate(false);
+      setNewRoom("");
+      setMessage(`Class ${grade}${section} created successfully.`);
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to create this class.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => { void load(); }, [load]);
 
   const visibleClasses = useMemo(() => {
@@ -140,6 +192,31 @@ export default function ClassesPage() {
           <ShieldCheck size={18} />
           <span><b>Role-checked school records</b><small>{role ? role.replaceAll("_", " ") : "Checking role"} · Database row policies remain active</small></span>
         </div>
+        {(role === "operator" || role === "admin") && (
+          <div className="classes-create-area">
+            <button className="classes-create-toggle" onClick={() => { setShowCreate((value) => !value); setMessage(""); }}>
+              <Plus size={15} /> {showCreate ? "Cancel" : "Create class"}
+            </button>
+            {showCreate && (
+              <form className="classes-create-form" onSubmit={createClass}>
+                <label>Grade
+                  <select value={newGrade} onChange={(event) => setNewGrade(event.target.value)} required>
+                    {Array.from({ length: 12 }, (_, index) => index + 1).map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                  </select>
+                </label>
+                <label>Section
+                  <select value={newSection} onChange={(event) => setNewSection(event.target.value)} required>
+                    {["A", "B", "C", "D"].map((section) => <option key={section} value={section}>{section}</option>)}
+                  </select>
+                </label>
+                <label>Room number <span>(optional)</span>
+                  <input value={newRoom} onChange={(event) => setNewRoom(event.target.value)} maxLength={30} placeholder="e.g. 204" />
+                </label>
+                <button type="submit" disabled={saving || busy}>{saving ? "Creating…" : "Create class"}</button>
+              </form>
+            )}
+          </div>
+        )}
         <div className="classes-stats">
           <article><span><Building2 size={17} /></span><div><strong>{classes.length}</strong><small>Classes visible</small></div></article>
           <article><span><Users size={17} /></span><div><strong>{students.length}</strong><small>Student records visible</small></div></article>
