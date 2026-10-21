@@ -106,7 +106,7 @@ export default function AttendancePage() {
       for (const record of records) byStudent[record.student_id] = { status: record.status, note: record.note ?? "" };
       setDrafts((previous) => {
         const next: Record<string, Draft> = {};
-        for (const student of roster) next[student.id] = byStudent[student.id] ?? previous[student.id] ?? { status: "", note: "" };
+        for (const student of roster) next[student.id] = byStudent[student.id] ?? { status: "", note: "" };
         return next;
       });
       if (!roster.length) setMessage("This class has no linked student accounts yet.");
