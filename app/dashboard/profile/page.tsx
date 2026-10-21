@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, RefreshCw, ShieldCheck, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -15,7 +15,7 @@ export default function ProfilePage() {
   const [createdAt,setCreatedAt]=useState("");
   const [assigned,setAssigned]=useState<string[]>([]);
   const [notice,setNotice]=useState("");
-  async function load(){
+  const load=useCallback(async()=>{
     setBusy(true);setNotice("");
     try{
       const db=createClient();
@@ -29,8 +29,8 @@ export default function ProfilePage() {
       setAssigned((data??[]).map((r:{role:string})=>roles[r.role]??r.role));
     }catch(e){setNotice(e instanceof Error?e.message:"Could not load profile.");}
     finally{setBusy(false);}
-  }
-  useEffect(()=>{void load();},[]);
+  },[router]);
+  useEffect(()=>{void load();},[load]);
   return <main style={{minHeight:"100vh",background:"#08090c",color:"#f4f0e6",padding:"28px 18px 56px"}}><section style={{maxWidth:900,margin:"0 auto"}}><header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:26}}><a href="/dashboard" style={{color:"#f0d9a0",textDecoration:"none",fontWeight:800}}>KVSync <span style={{color:"#d3a64f"}}>Pro</span></a><button onClick={()=>router.push("/dashboard")} style={btn}><ArrowLeft size={15}/> Overview</button></header><div style={eyebrow}>ACCOUNT · IDENTITY</div><h1 style={{fontSize:"clamp(28px,5vw,42px)",margin:"8px 0"}}>My profile</h1><p style={{color:"#a6a5ab",marginTop:0}}>Your signed-in account and assigned school roles.</p><section style={panel}><div style={{display:"flex",alignItems:"center",gap:14,marginBottom:22}}><div style={{width:54,height:54,borderRadius:16,display:"grid",placeItems:"center",background:"#282116",color:"#f0d9a0"}}><UserRound size={25}/></div><div><h2 style={{margin:"0 0 4px",fontSize:21}}>{name||"School account"}</h2><p style={{margin:0,color:"#a6a5ab"}}>{email||"Loading account…"}</p></div></div>{busy?<p>Loading account details…</p>:<><div style={grid}><Info label="Display name" value={name||"Not set"}/><Info label="Login ID" value={email||"Not available"}/><Info label="Account created" value={createdAt?new Date(createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"Not available"}/><div><div style={label}>Assigned roles</div><div style={{display:"flex",flexWrap:"wrap",gap:7,marginTop:8}}>{assigned.length?assigned.map(r=><span key={r} style={chip}>{r}</span>):<span style={{color:"#a6a5ab"}}>No roles found</span>}</div></div></div><div style={{borderTop:"1px solid #302d28",paddingTop:16,marginTop:22,display:"flex",gap:10,alignItems:"center",color:"#cfc3a4"}}><ShieldCheck size={18}/> Permissions are controlled by your assigned role and database policies.</div></>}{notice&&<p role="status" style={{color:"#f0b7a9"}}>{notice}</p>}<button onClick={()=>void load()} disabled={busy} style={{...btn,marginTop:18}}><RefreshCw size={14}/>{busy?"Loading…":"Refresh profile"}</button><button onClick={()=>router.push("/dashboard/settings")} style={{...btn,marginLeft:8}}>Profile & security settings →</button></section></section></main>;
 }
 function Info({label,value}:{label:string;value:string}){return <div><div style={labelStyle}>{label}</div><div style={{marginTop:7,overflowWrap:"anywhere"}}>{value}</div></div>}
