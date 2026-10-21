@@ -147,3 +147,14 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .classes-empty{min-height:125px;display:flex;align-items:center;justify-content:center;padding:22px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#101114;color:#a4a5ab;font-size:12px;line-height:1.8;text-align:center}
 .classes-caveat{margin-top:20px;color:#74767e;font-size:10px;line-height:1.8}
 @media(max-width:760px){.classes-page>header{height:65px;padding:0 18px}.classes-page>section{padding:32px 18px}.classes-heading{align-items:flex-start;flex-direction:column}.classes-stats{gap:9px}.classes-stats article{padding:12px;gap:9px}.classes-grid{grid-template-columns:1fr}.classes-card{padding:15px}.classes-roster>div{gap:8px}}
+
+
+.classes-create-area{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin:0 0 18px}
+.classes-create-toggle,.classes-create-form>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:39px;padding:0 14px;border:1px solid rgba(215,180,106,.32);border-radius:9px;background:rgba(215,180,106,.08);color:#e0c37f;font-size:11px;cursor:pointer}
+.classes-create-form{display:grid;grid-template-columns:minmax(100px,.7fr) minmax(100px,.7fr) minmax(150px,1.4fr) auto;align-items:end;gap:12px;width:100%;padding:16px;border:1px solid rgba(215,180,106,.2);border-radius:12px;background:#101114}
+.classes-create-form label{display:grid;gap:7px;color:#b9b7b0;font-size:10px}
+.classes-create-form label span{color:#777982}
+.classes-create-form input,.classes-create-form select{width:100%;min-width:0;height:39px;padding:0 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px;outline:none;background:#0b0c0f;color:#eee8d8;font-size:11px}
+.classes-create-form input:focus,.classes-create-form select:focus{border-color:rgba(215,180,106,.5)}
+.classes-create-form>button:disabled{opacity:.5;cursor:wait}
+@media(max-width:760px){.classes-create-form{grid-template-columns:1fr 1fr}.classes-create-form label:nth-child(3){grid-column:1/-1}.classes-create-form>button{grid-column:1/-1;width:100%}}
