@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, FileText, RefreshCw, ShieldCheck, Plus, Pencil, X, Download, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { compressImageForUpload } from "@/lib/image-compression";
 
 type Homework = { id: string; class_id: string; title: string; subject: string; description: string | null; deadline: string | null; created_at: string; posted_by?: string };
 type Material = { id: string; title: string; subject: string; file_url: string; file_type: string | null };
@@ -158,10 +159,13 @@ export default function LearningPage() {
     try {
       const { data: auth, error: authError } = await db.auth.getUser();
       if (authError || !auth.user) throw new Error("Your session expired. Sign in again.");
-      const safeName = materialFile.name.normalize("NFKD").replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^\.+/, "").slice(-120) || "resource";
+      const uploadFile = materialFile.type.startsWith("image/")
+        ? await compressImageForUpload(materialFile, { maxDimension: 2560, quality: 0.92 })
+        : materialFile;
+      const safeName = uploadFile.name.normalize("NFKD").replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^\.+/, "").slice(-120) || "resource";
       uploadedPath = classId + "/" + crypto.randomUUID() + "-" + safeName;
-      const { error: uploadError } = await db.storage.from("kvsync-study-materials").upload(uploadedPath, materialFile, {
-        contentType: materialFile.type,
+      const { error: uploadError } = await db.storage.from("kvsync-study-materials").upload(uploadedPath, uploadFile, {
+        contentType: uploadFile.type,
         cacheControl: "60",
         upsert: false,
       });
@@ -171,7 +175,7 @@ export default function LearningPage() {
         title: materialTitle.trim(),
         subject: materialSubject.trim(),
         file_url: uploadedPath,
-        file_type: materialFile.type,
+        file_type: uploadFile.type,
         uploaded_by: auth.user.id,
       });
       if (rowError) {
@@ -233,7 +237,8 @@ export default function LearningPage() {
         <label>Subject<input required maxLength={80} value={materialSubject} onChange={e => setMaterialSubject(e.target.value)} style={inputStyle} placeholder="e.g. Science"/></label>
         <label>Resource title<input required maxLength={160} value={materialTitle} onChange={e => setMaterialTitle(e.target.value)} style={inputStyle} placeholder="e.g. Chapter 4 notes"/></label>
         <label>File (PDF, JPG, PNG, WEBP, DOCX, PPTX, XLSX; max 25 MB)<input required type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.pptx,.xlsx" onChange={e => setMaterialFile(e.target.files?.[0] ?? null)} style={inputStyle}/></label>
-        {materialFile && <small>{materialFile.name} · {(materialFile.size / (1024 * 1024)).toFixed(2)} MB</small>}
+        <small style={{color:"var(--muted,#a6a5ab)"}}>Images are resized to max 2560 px and converted to high-quality WebP before upload. PDF and Office documents are kept unchanged to preserve original content and formatting.</small>
+        {materialFile && <small>{materialFile.name} · {(materialFile.size / (1024 * 1024)).toFixed(2)} MB{materialFile.type.startsWith("image/") ? " · Will be compressed to WebP" : " · Original file preserved"}</small>}
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="submit" disabled={saving || !classes.length}>{saving ? "Uploading…" : "Upload resource"}</button><button type="button" onClick={() => setMaterialEditorOpen(false)}>Cancel</button></div>
       </form>}
       {downloadUrl && <div className="learning-inline-message">Your secure link is ready. <a href={downloadUrl} target="_blank" rel="noreferrer">Open resource ↗</a><button type="button" onClick={() => setDownloadUrl("")}>Dismiss</button></div>}
