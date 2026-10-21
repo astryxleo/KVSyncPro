@@ -55,7 +55,8 @@ export default function WorkspaceModulePage() {
       setUserId(auth.user.id);
       const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
       if (roleError) throw new Error("Role verification failed. This workspace is locked.");
-      const knownRoles: Role[] = ["operator", "admin", "teacher", "student", "system_moderator", "data_content_manager", "tester", "support_manager"];\n      const assigned = (roleRows ?? []).map((row: { role: string }) => row.role).filter((role): role is Role => knownRoles.includes(role as Role));
+      const knownRoles: Role[] = ["operator", "admin", "teacher", "student", "system_moderator", "data_content_manager", "tester", "support_manager"];
+      const assigned = (roleRows ?? []).map((row: { role: string }) => row.role).filter((role): role is Role => knownRoles.includes(role as Role));
       if (!assigned.some((role) => allowedRoles[workspace]?.includes(role))) throw new Error("Your assigned role does not include access to this workspace.");
       setRoles(assigned);
       let result: { data: unknown[] | null; error: { message: string } | null };
@@ -98,7 +99,8 @@ export default function WorkspaceModulePage() {
     try {
       const db = createClient();
       const table = workspace === "bugs" ? "bug_reports" : "contact_messages";
-      const update = workspace === "bugs" ? { status, updated_at: new Date().toISOString() } : { status };\n      const { error } = await db.from(table).update(update).eq("id", item.id);
+      const update = workspace === "bugs" ? { status, updated_at: new Date().toISOString() } : { status };
+      const { error } = await db.from(table).update(update).eq("id", item.id);
       if (error) throw new Error("Status update was rejected by the database policy.");
       setMessage("Status updated."); await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Status update failed."); }
