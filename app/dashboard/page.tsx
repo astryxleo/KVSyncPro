@@ -128,7 +128,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <main className="dashboard-loading"><span className="loading-mark">KV</span><p>Securing your workspace…</p></main>;
+    return <main className="dashboard-loading"><span className="loading-mark"><img src="https://raw.githubusercontent.com/astryxleo/KVSyncPro/main/download.png" alt="KVSync Pro logo" width="46" height="46" style={{objectFit:"contain",borderRadius:10}} /></span><p>Securing your workspace…</p></main>;
   }
 
   if (error) {
@@ -138,7 +138,7 @@ export default function DashboardPage() {
   return (
     <main className="dashboard-shell">
       <aside className={`dash-sidebar ${mobileOpen ? "dash-sidebar-open" : ""}`}>
-        <a className="dash-brand" href="/"><span className="dash-brand-mark">KV</span><span><strong>KVSync <em>Pro</em></strong><small>JANAKPURI CAMPUS</small></span></a>
+        <a className="dash-brand" href="/"><span className="dash-brand-mark"><img src="https://raw.githubusercontent.com/astryxleo/KVSyncPro/main/download.png" alt="" width="39" height="39" style={{objectFit:"contain",borderRadius:10}} /></span><span><strong>KVSync <em>Pro</em></strong><small>JANAKPURI CAMPUS</small></span></a>
         <div className="dash-workspace-label">WORKSPACE</div>
         <nav className="dash-nav" aria-label="Workspace navigation">
           {visibleModules.map((item) => {
