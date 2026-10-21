@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, RefreshCw, ShieldCheck, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -86,7 +86,7 @@ export default function TimetablePage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function addPeriod(event: React.FormEvent<HTMLFormElement>) {
+  async function addPeriod(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!classId || !newSubject.trim() || !classes.some((item) => item.id === classId) || saving) return;
     setSaving(true); setMessage("");
