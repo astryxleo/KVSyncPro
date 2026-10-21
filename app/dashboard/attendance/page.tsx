@@ -31,6 +31,19 @@ export default function AttendancePage() {
         if (error) throw new Error("Could not verify your student profile.");
         if (!student) { setRows([]); setMessage("Your student profile is not linked yet. Ask the operator to complete account provisioning."); return; }
         q = q.eq("student_id", student.id);
+      } else if (currentRole === "teacher") {
+        const [classAssignments, subjectAssignments] = await Promise.all([
+          db.from("class_teachers").select("class_id").eq("teacher_id", auth.user.id),
+          db.from("class_subject_teachers").select("class_id").eq("teacher_id", auth.user.id),
+        ]);
+        if (classAssignments.error || subjectAssignments.error) throw new Error("Could not verify your teaching assignments. Attendance is hidden.");
+        const classIds = [...new Set([...(classAssignments.data ?? []), ...(subjectAssignments.data ?? [])].map((row: {class_id:string}) => row.class_id))];
+        if (!classIds.length) {
+          setRows([]);
+          setMessage("No classes are linked to your teacher account yet.");
+          return;
+        }
+        q = q.in("class_id", classIds);
       }
       const { data, error } = await q;
       if (error) throw new Error("Could not load records. Supabase row-level security remains in force.");
