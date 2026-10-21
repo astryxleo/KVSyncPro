@@ -104,7 +104,7 @@ export default function AttendancePage() {
       setRows(records);
       const byStudent: Record<string, Draft> = {};
       for (const record of records) byStudent[record.student_id] = { status: record.status, note: record.note ?? "" };
-      setDrafts((previous) => {
+      setDrafts(() => {
         const next: Record<string, Draft> = {};
         for (const student of roster) next[student.id] = byStudent[student.id] ?? { status: "", note: "" };
         return next;
