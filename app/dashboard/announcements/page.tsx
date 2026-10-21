@@ -34,6 +34,7 @@ export default function AnnouncementsPage() {
       const currentRole = ["operator","admin","teacher","student","data_content_manager"].find((r) => assigned.includes(r));
       if (!currentRole) throw new Error("Your assigned role does not include announcement access.");
       setRole(currentRole);
+      if (currentRole === "teacher") setTargetRole("class");
       if (currentRole === "operator" || currentRole === "admin") {
         const { data: allClasses, error: classError } = await db.from("classes").select("id,grade,section").order("grade").order("section");
         if (classError) throw new Error("Classes could not be loaded for announcement targeting.");
@@ -58,8 +59,6 @@ export default function AnnouncementsPage() {
       let query = db.from("updates").select("id,title,content,target_role,class_id,created_at").order("created_at",{ascending:false}).limit(100);
       if (currentRole === "student") {
         query = query.or(`target_role.eq.all,target_role.eq.student,and(target_role.eq.class,class_id.eq.${studentClassId})`);
-      } else if (currentRole === "teacher") {
-        query = query.or("target_role.eq.all,target_role.eq.teacher");
       }
       const { data, error } = await query;
       if (error) throw new Error("Announcements could not be loaded. Check database permissions.");
