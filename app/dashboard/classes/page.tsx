@@ -8,7 +8,9 @@ import { createClient } from "@/lib/supabase";
 type SchoolRole = "operator" | "admin" | "teacher";
 type SchoolClass = { id: string; grade: number; section: string; room_number: string | null };
 type StudentRow = { id: string; user_id: string; class_id: string; roll_number: string };
-type ProfileRow = { user_id: string; full_name: string | null };
+type ProfileRow = { user_id: string; full_name: string | null; email?: string | null };
+type TeacherRow = { user_id: string; full_name: string | null; email: string | null };
+type ClassTeacherRow = { id: string; class_id: string; teacher_id: string; academic_year: string };
 
 export default function ClassesPage() {
   const router = useRouter();
@@ -16,6 +18,11 @@ export default function ClassesPage() {
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [teachers, setTeachers] = useState<TeacherRow[]>([]);
+  const [classTeachers, setClassTeachers] = useState<ClassTeacherRow[]>([]);
+  const [assignmentClass, setAssignmentClass] = useState("");
+  const [assignmentTeacher, setAssignmentTeacher] = useState("");
+  const [assignmentBusy, setAssignmentBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("");
@@ -82,6 +89,28 @@ export default function ClassesPage() {
       const nextStudents = (studentResult.data ?? []) as StudentRow[];
       setClasses(nextClasses);
       setStudents(nextStudents);
+
+      if (currentRole === "operator" || currentRole === "admin") {
+        const [teacherRoleResult, assignmentResult] = await Promise.all([
+          db.from("user_roles").select("user_id").eq("role", "teacher"),
+          db.from("class_teachers").select("id,class_id,teacher_id,academic_year").order("academic_year", { ascending: false }),
+        ]);
+        if (teacherRoleResult.error || assignmentResult.error) throw new Error("Teacher assignments could not be loaded.");
+        const teacherIds = [...new Set((teacherRoleResult.data ?? []).map((row: { user_id: string }) => row.user_id))];
+        const assignmentRows = (assignmentResult.data ?? []) as ClassTeacherRow[];
+        setClassTeachers(assignmentRows);
+        if (teacherIds.length) {
+          const { data: teacherProfiles, error: teacherProfilesError } = await db
+            .from("profiles").select("user_id,full_name,email").in("user_id", teacherIds);
+          if (teacherProfilesError) throw new Error("Teacher directory could not be loaded.");
+          setTeachers((teacherProfiles ?? []) as TeacherRow[]);
+        } else {
+          setTeachers([]);
+        }
+      } else {
+        setTeachers([]);
+        setClassTeachers([]);
+      }
 
       if (currentRole === "operator" || currentRole === "admin") {
         const userIds = [...new Set(nextStudents.map((student) => student.user_id))];
@@ -156,6 +185,60 @@ export default function ClassesPage() {
       setMessage(error instanceof Error ? error.message : "Unable to create this class.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const assignHomeroomTeacher = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if ((role !== "operator" && role !== "admin") || !assignmentClass || !assignmentTeacher) return;
+    setAssignmentBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) { router.replace("/"); return; }
+      const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
+      if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
+        throw new Error("Only Operator or Admin can manage homeroom assignments.");
+      }
+      const { error } = await db.from("class_teachers").insert({ class_id: assignmentClass, teacher_id: assignmentTeacher });
+      if (error) {
+        if (error.code === "23505") throw new Error("This class already has a homeroom teacher assigned for the academic year.");
+        if (error.code === "42501") throw new Error("Database permissions do not allow this assignment.");
+        throw new Error("Could not assign the teacher. Check that the account has the Teacher role.");
+      }
+      setAssignmentClass("");
+      setAssignmentTeacher("");
+      setMessage("Homeroom teacher assigned successfully.");
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to assign this teacher.");
+    } finally {
+      setAssignmentBusy(false);
+    }
+  };
+
+  const removeHomeroomTeacher = async (assignment: ClassTeacherRow) => {
+    if (role !== "operator" && role !== "admin") return;
+    if (!window.confirm("Remove this homeroom teacher assignment?")) return;
+    setAssignmentBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) { router.replace("/"); return; }
+      const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
+      if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
+        throw new Error("Only Operator or Admin can manage homeroom assignments.");
+      }
+      const { error } = await db.from("class_teachers").delete().eq("id", assignment.id);
+      if (error) throw new Error("Could not remove the assignment under current database permissions.");
+      setMessage("Homeroom assignment removed.");
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to remove this assignment.");
+    } finally {
+      setAssignmentBusy(false);
     }
   };
 
@@ -237,6 +320,29 @@ export default function ClassesPage() {
                   </div>
                   <h2>Class {schoolClass.grade}<span>{schoolClass.section}</span></h2>
                   <p>{roster.length} student record{roster.length === 1 ? "" : "s"}</p>
+                  {(role === "operator" || role === "admin") && (() => {
+                    const assignment = classTeachers.find((item) => item.class_id === schoolClass.id);
+                    const teacher = assignment ? teachers.find((item) => item.user_id === assignment.teacher_id) : null;
+                    return (
+                      <div className="classes-assignment">
+                        <div className="classes-assignment-heading">Homeroom teacher</div>
+                        {assignment ? (
+                          <div className="classes-assigned-teacher">
+                            <span>{teacher?.full_name || teacher?.email || "Assigned teacher"}</span>
+                            <button type="button" disabled={assignmentBusy} onClick={() => void removeHomeroomTeacher(assignment)}>Remove</button>
+                          </div>
+                        ) : (
+                          <form className="classes-assignment-form" onSubmit={assignHomeroomTeacher}>
+                            <select aria-label={`Teacher for class ${schoolClass.grade}${schoolClass.section}`} value={assignmentClass === schoolClass.id ? assignmentTeacher : ""} onChange={(event) => { setAssignmentClass(schoolClass.id); setAssignmentTeacher(event.target.value); }} required>
+                              <option value="">Select teacher</option>
+                              {teachers.map((item) => <option key={item.user_id} value={item.user_id}>{item.full_name || item.email || item.user_id}</option>)}
+                            </select>
+                            <button type="submit" disabled={assignmentBusy || !teachers.length} onClick={() => setAssignmentClass(schoolClass.id)}>{assignmentBusy ? "Saving…" : "Assign"}</button>
+                          </form>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {roster.length ? (
                     <div className="classes-roster">
                       {roster.slice(0, 8).map((student) => (
@@ -254,7 +360,7 @@ export default function ClassesPage() {
             })}
           </div>
         ) : <div className="classes-empty">No classes match your search.</div>}
-        <p className="classes-caveat">This is a read-only directory. Class creation, account provisioning and roster edits stay disabled until their complete authorization and validation workflows are tested.</p>
+        <p className="classes-caveat">Teacher homeroom assignment and class creation are available to Operator/Admin and remain enforced by database policies. Student roster edits and account provisioning are not enabled here.</p>
       </section>
     </main>
   );
