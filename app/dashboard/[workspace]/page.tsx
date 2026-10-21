@@ -64,12 +64,12 @@ export default function WorkspaceModulePage() {
       let result: { data: unknown[] | null; error: { message: string } | null };
       if (workspace === "content") {
         result = await db.from("updates").select("id,title,content,target_role,created_at").order("created_at", { ascending: false }).limit(100);
+      } else if (workspace === "bugs" && assigned.includes("tester") && !assigned.some((role) => ["operator", "admin", "support_manager"].includes(role))) {
+        result = await db.from("bug_reports").select("id,title,description,severity,status,created_at,reporter_id").eq("reporter_id", auth.user.id).order("created_at", { ascending: false }).limit(100);
       } else if (workspace === "bugs") {
         result = await db.from("bug_reports").select("id,title,description,severity,status,created_at,reporter_id,screenshot_url").order("created_at", { ascending: false }).limit(100);
       } else if (workspace === "support") {
         result = await db.from("contact_messages").select("id,subject,message,status,created_at,sender_id,recipient_id").is("deleted_at", null).order("created_at", { ascending: false }).limit(100);
-      } else if (assigned.includes("tester") && !assigned.some((role) => ["operator", "admin"].includes(role))) {
-        result = await db.from("bug_reports").select("id,title,description,severity,status,created_at,reporter_id").eq("reporter_id", auth.user.id).order("created_at", { ascending: false }).limit(100);
       } else {
         result = await db.from("moderation_action_logs").select("id,message_id,actor_id,action,reason,created_at").order("created_at", { ascending: false }).limit(100);
       }
