@@ -132,7 +132,7 @@ export default function DashboardPage() {
   }
 
   if (error) {
-    return <main className="dashboard-loading"><div className="dashboard-error"><ShieldCheck size={25} /><h1>Workspace verification paused</h1><p>{error}</p><button className="dash-button" onClick={() => void loadSession()}>Retry verification <ArrowRight size={16} /></button><button className="dash-text-button" onClick={() => router.replace("/")}>Return to sign in</button></div></main>;
+    return <main className="dashboard-loading"><div className="dashboard-error"><ShieldCheck size={25} /><h1>Workspace verification paused</h1><p>{error}</p><button type="button" className="dash-button" onClick={() => void loadSession()}>Retry verification <ArrowRight size={16} /></button><button type="button" className="dash-text-button" onClick={() => router.replace("/")}>Return to sign in</button></div></main>;
   }
 
   return (
@@ -143,16 +143,16 @@ export default function DashboardPage() {
         <nav className="dash-nav" aria-label="Workspace navigation">
           {visibleModules.map((item) => {
             const Icon = item.icon;
-            return <button key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setMobileOpen(false); openModule(item.label); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
+            return <button type="button" key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setMobileOpen(false); openModule(item.label); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
           })}
         </nav>
-        <div className="dash-sidebar-bottom"><div className="dash-secure-note"><span className="secure-dot" /><span><strong>Protected workspace</strong><small>Access checked against assigned role</small></span></div><button className="dash-signout" onClick={() => void signOut()} disabled={signingOut}><LogOut size={16} />{signingOut ? "Signing out…" : "Sign out"}</button></div>
+        <div className="dash-sidebar-bottom"><div className="dash-secure-note"><span className="secure-dot" /><span><strong>Protected workspace</strong><small>Access checked against assigned role</small></span></div><button type="button" className="dash-signout" onClick={() => void signOut()} disabled={signingOut}><LogOut size={16} />{signingOut ? "Signing out…" : "Sign out"}</button></div>
       </aside>
 
-      {mobileOpen && <button aria-label="Close navigation" className="dash-backdrop" onClick={() => setMobileOpen(false)} />}
+      {mobileOpen && <button type="button" aria-label="Close navigation" className="dash-backdrop" onClick={() => setMobileOpen(false)} />}
       <section className="dash-main">
         <header className="dash-topbar">
-          <button className="dash-menu-toggle" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
+          <button type="button" className="dash-menu-toggle" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
           <div className="dash-breadcrumb">KVSync Pro <ChevronRight size={13} /> <span>{active}</span></div>
           <div className="dash-topbar-right"><span className="dash-status"><span className="secure-dot" /> SECURE SESSION</span><div className="dash-avatar">{(email[0] ?? "U").toUpperCase()}</div></div>
         </header>
@@ -164,11 +164,11 @@ export default function DashboardPage() {
             <>
               <div className="dash-highlight"><div className="highlight-icon"><ShieldCheck size={21} /></div><div><strong>Identity verified · Role-aware access enabled</strong><p>KVSync Pro has checked your active session and loaded the modules associated with your assigned role{roles.length > 1 ? "s" : ""}.</p></div><CheckCircle2 className="highlight-check" size={19} /></div>
               <div className="dash-section-heading"><div><h2>Your modules</h2><p>Choose a workspace to continue.</p></div><span>{visibleModules.length} AVAILABLE</span></div>
-              <div className="dash-module-grid">{visibleModules.filter((item) => item.label !== "Overview").map((item) => { const Icon = item.icon; return <button key={item.label} className="dash-module-card" onClick={() => openModule(item.label)}><span className="module-icon"><Icon size={19} /></span><span className="module-card-title">{item.label}</span><span className="module-card-description">{item.description}</span><span className="module-card-footer">Open module <ArrowRight size={14} /></span></button>; })}</div>
+              <div className="dash-module-grid">{visibleModules.filter((item) => item.label !== "Overview").map((item) => { const Icon = item.icon; return <button type="button" key={item.label} className="dash-module-card" onClick={() => openModule(item.label)}><span className="module-icon"><Icon size={19} /></span><span className="module-card-title">{item.label}</span><span className="module-card-description">{item.description}</span><span className="module-card-footer">Open module <ArrowRight size={14} /></span></button>; })}</div>
               <div className="dash-bottom-grid"><div className="dash-info-card"><div className="info-card-heading"><span className="module-icon small"><WalletCards size={17} /></span><div><strong>Workspace status</strong><small>Application readiness</small></div></div><div className="status-line"><span>Sign-in session</span><span className="state-live"><span /> Verified</span></div><div className="status-line"><span>Role permissions</span><span className="state-live"><span /> Loaded</span></div><div className="status-line"><span>Core workflows</span><span className="state-live"><span /> Connected</span></div></div><div className="dash-info-card dash-next-card"><div className="info-card-heading"><span className="module-icon small"><ArrowDownLeft size={17} /></span><div><strong>Built in phases</strong><small>KVSync Pro development</small></div></div><p>Open a module to work with school data. Available actions are governed by your assigned role and database permissions; empty feeds mean no records are available yet.</p></div></div>
             </>
           ) : (
-            <div className="dash-module-detail"><div className="detail-icon">{selectedModule && <selectedModule.icon size={25} />}</div><div className="dash-eyebrow">WORKSPACE MODULE</div><h2>{active}</h2><p>{selectedModule?.description}</p><div className="detail-notice"><Activity size={18} /><div><strong>Module foundation is in place</strong><span>This screen is currently a safe workspace shell. Live records, create/edit actions and role-specific workflows still need to be wired and tested before this module is considered operational.</span></div></div><button className="dash-button" onClick={() => setActive("Overview")}>Back to overview <ArrowRight size={16} /></button></div>
+            <div className="dash-module-detail"><div className="detail-icon">{selectedModule && <selectedModule.icon size={25} />}</div><div className="dash-eyebrow">WORKSPACE MODULE</div><h2>{active}</h2><p>{selectedModule?.description}</p><div className="detail-notice"><Activity size={18} /><div><strong>Module foundation is in place</strong><span>This screen is currently a safe workspace shell. Live records, create/edit actions and role-specific workflows still need to be wired and tested before this module is considered operational.</span></div></div><button type="button" className="dash-button" onClick={() => setActive("Overview")}>Back to overview <ArrowRight size={16} /></button></div>
           )}
           <footer className="dash-footer"><span>© {new Date().getFullYear()} KVSync Pro</span><span>PM SHRI KV JANAKPURI</span><span>SECURE SCHOOL WORKSPACE</span></footer>
         </div>
