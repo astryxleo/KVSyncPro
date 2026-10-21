@@ -41,8 +41,7 @@ export default function Home() {
         await supabase.auth.signOut();
         throw new Error("This account has no assigned KVSync Pro role. Ask the operator to provision your account.");
       }
-      setSignedIn({ email: data.user.email ?? email.trim(), roles });
-      setPassword("");
+      window.location.assign("/dashboard");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
     } finally {
