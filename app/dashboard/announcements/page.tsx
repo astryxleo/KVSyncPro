@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, RefreshCw, ShieldCheck, Plus, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -72,7 +72,7 @@ export default function AnnouncementsPage() {
 
   const canPublish = role === "operator" || role === "admin" || role === "teacher";
 
-  async function publishAnnouncement(event: React.FormEvent<HTMLFormElement>) {
+  async function publishAnnouncement(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const cleanTitle = title.trim();
     const cleanBody = body.trim();
