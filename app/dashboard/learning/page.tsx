@@ -35,7 +35,7 @@ export default function LearningPage() {
         classId = student.class_id;
       }
       let homeworkQuery = db.from("homework").select("id,title,subject,description,deadline,created_at").order("created_at",{ascending:false}).limit(100);
-      let materialQuery = db.from("study_materials").select("id,title,subject,file_url,file_type").order("created_at",{ascending:false}).limit(100);
+      let materialQuery = db.from("study_materials").select("id,title,subject,file_url,file_type").limit(100);
       if (classId) {
         homeworkQuery = homeworkQuery.eq("class_id", classId);
         materialQuery = materialQuery.eq("class_id", classId);
