@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Building2, Download, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
-type SchoolRole = "operator" | "admin" | "teacher";
+type SchoolRole = "operator" | "admin" | "teacher" | "data_content_manager";
 type SchoolClass = { id: string; grade: number; section: string; room_number: string | null };
 type StudentRow = { id: string; user_id: string; class_id: string; roll_number: string };
 type ProfileRow = { user_id: string; full_name: string | null; email?: string | null };
@@ -55,7 +55,7 @@ export default function ClassesPage() {
       if (roleError) throw new Error("Role verification failed. Class records are hidden.");
 
       const assigned = (roleRows ?? []).map((row: { role: string }) => row.role);
-      const currentRole = (["operator", "admin", "teacher"] as const).find((item) => assigned.includes(item));
+      const currentRole = (["operator", "admin", "data_content_manager", "teacher"] as const).find((item) => assigned.includes(item));
       if (!currentRole) throw new Error("Your assigned role does not include class-directory access.");
       setRole(currentRole);
 
