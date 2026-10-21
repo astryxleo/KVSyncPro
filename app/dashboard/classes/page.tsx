@@ -333,6 +333,7 @@ export default function ClassesPage() {
             <h1>Classes &amp; people</h1>
             <p>Class directory and student roster visible to your verified school role.</p>
           </div>
+          <button className="classes-provision-link" onClick={() => router.push("/dashboard/accounts")}><Plus size={14} /> Provision accounts</button>
           <button onClick={() => void load()} disabled={busy}><RefreshCw size={14} /> Refresh</button>
         </div>
         <div className="classes-verified">
