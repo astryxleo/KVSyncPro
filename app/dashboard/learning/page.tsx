@@ -32,6 +32,7 @@ export default function LearningPage() {
   const [materialTitle, setMaterialTitle] = useState("");
   const [materialSubject, setMaterialSubject] = useState("");
   const [materialFile, setMaterialFile] = useState<File | null>(null);
+  const [searchText, setSearchText] = useState("");
 
   const load = useCallback(async () => {
     setBusy(true); setMessage("");
@@ -95,6 +96,10 @@ export default function LearningPage() {
   }, [router]);
 
   useEffect(() => { void load(); }, [load]);
+
+  const search = searchText.trim().toLowerCase();
+  const filteredHomework = homework.filter((item) => `${item.title} ${item.subject} ${item.description ?? ""}`.toLowerCase().includes(search));
+  const filteredMaterials = materials.filter((item) => `${item.title} ${item.subject} ${item.file_type ?? ""}`.toLowerCase().includes(search));
 
   const startEdit = (item: Homework) => {
     setEditingId(item.id); setClassId(item.class_id); setSubject(item.subject); setTitle(item.title);
@@ -232,13 +237,14 @@ export default function LearningPage() {
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="submit" disabled={saving || !classes.length}>{saving ? "Uploading…" : "Upload resource"}</button><button type="button" onClick={() => setMaterialEditorOpen(false)}>Cancel</button></div>
       </form>}
       {downloadUrl && <div className="learning-inline-message">Your secure link is ready. <a href={downloadUrl} target="_blank" rel="noreferrer">Open resource ↗</a><button type="button" onClick={() => setDownloadUrl("")}>Dismiss</button></div>}
+      <label style={{display:"block",marginBottom:14}}>Search homework and resources<input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="Search title, subject, or description…" style={{...inputStyle,marginTop:7}} aria-label="Search learning resources"/></label>
       {busy ? <div className="learning-message">Loading learning resources securely…</div> : message && !homework.length && !materials.length ? <div className="learning-message">{message}</div> : <>
         <div className="learning-grid">
-          <article className="learning-panel"><div className="learning-panel-head"><span><BookOpen size={18}/></span><div><h2>Homework</h2><p>{homework.length} item(s) available</p></div></div>
-            {homework.length ? homework.map(item => <div className="learning-item" key={item.id}><div><span className="learning-subject">{item.subject || "General"}</span><h3>{item.title}</h3>{item.description && <p>{item.description}</p>}</div><div style={{display:"grid",justifyItems:"end",gap:8}}><small>{item.deadline ? "Due "+new Date(item.deadline).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) : "No deadline listed"}</small>{canEditHomework(item) && <button type="button" onClick={() => startEdit(item)} aria-label={"Edit "+item.title}><Pencil size={14}/> Edit</button>}</div></div>) : <p className="learning-empty">No homework items are visible to this account.</p>}
+          <article className="learning-panel"><div className="learning-panel-head"><span><BookOpen size={18}/></span><div><h2>Homework</h2><p>{filteredHomework.length} item(s) match</p></div></div>
+            {filteredHomework.length ? filteredHomework.map(item => <div className="learning-item" key={item.id}><div><span className="learning-subject">{item.subject || "General"}</span><h3>{item.title}</h3>{item.description && <p>{item.description}</p>}</div><div style={{display:"grid",justifyItems:"end",gap:8}}><small>{item.deadline ? "Due "+new Date(item.deadline).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) : "No deadline listed"}</small>{canEditHomework(item) && <button type="button" onClick={() => startEdit(item)} aria-label={"Edit "+item.title}><Pencil size={14}/> Edit</button>}</div></div>) : <p className="learning-empty">{searchText ? "No homework matches your search." : "No homework items are visible to this account."}</p>}
           </article>
-          <article className="learning-panel"><div className="learning-panel-head"><span><FileText size={18}/></span><div><h2>Study materials</h2><p>{materials.length} resource(s) available</p></div></div>
-            {materials.length ? materials.map(item => <div className="learning-item material" key={item.id}><div><span className="learning-subject">{item.subject || "General"}{item.file_type ? " · "+item.file_type : ""}</span><h3>{item.title}</h3></div><button type="button" onClick={() => void openMaterial(item)} disabled={openingFile === item.id}><Download size={14}/>{openingFile === item.id ? "Preparing…" : "Open securely"}</button></div>) : <p className="learning-empty">No study materials are visible to this account.</p>}
+          <article className="learning-panel"><div className="learning-panel-head"><span><FileText size={18}/></span><div><h2>Study materials</h2><p>{filteredMaterials.length} resource(s) match</p></div></div>
+            {filteredMaterials.length ? filteredMaterials.map(item => <div className="learning-item material" key={item.id}><div><span className="learning-subject">{item.subject || "General"}{item.file_type ? " · "+item.file_type : ""}</span><h3>{item.title}</h3></div><button type="button" onClick={() => void openMaterial(item)} disabled={openingFile === item.id}><Download size={14}/>{openingFile === item.id ? "Preparing…" : "Open securely"}</button></div>) : <p className="learning-empty">{searchText ? "No study materials match your search." : "No study materials are visible to this account."}</p>}
           </article>
         </div>
         {message && <div className="learning-inline-message">{message}</div>}
