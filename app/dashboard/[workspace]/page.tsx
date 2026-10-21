@@ -37,6 +37,8 @@ export default function WorkspaceModulePage() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [targetRole, setTargetRole] = useState("all");
+  const [bugDescription, setBugDescription] = useState("");
+  const [severity, setSeverity] = useState("medium");
 
   const validWorkspace = Object.prototype.hasOwnProperty.call(labels, workspace);
   const primaryRole = useMemo(() => roles.find((role) => allowedRoles[workspace]?.includes(role)) ?? "", [roles, workspace]);
@@ -89,8 +91,22 @@ export default function WorkspaceModulePage() {
       const db = createClient();
       const { error } = await db.from("updates").insert({ title: title.trim(), content: body.trim(), target_role: targetRole, class_id: null, posted_by: userId });
       if (error) throw new Error("Publishing failed. Confirm your role and database policy.");
-      setTitle(""); setBody(""); setMessage("Announcement published successfully."); await load();
+      setTitle(""); setBody(""); await load(); setMessage("Announcement published successfully.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Publishing failed."); }
+    finally { setSaving(false); }
+  }
+
+  async function submitBugReport(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!roles.includes("tester") || !title.trim() || !bugDescription.trim()) return;
+    setSaving(true); setMessage("");
+    try {
+      const db = createClient();
+      const { error } = await db.from("bug_reports").insert({ reporter_id: userId, title: title.trim(), description: bugDescription.trim(), severity, status: "open" });
+      if (error) throw new Error("Bug report could not be submitted. Confirm the Tester role and database policy.");
+      setTitle(""); setBugDescription(""); setSeverity("medium");
+      await load(); setMessage("Bug report submitted.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Bug report submission failed."); }
     finally { setSaving(false); }
   }
 
@@ -102,7 +118,7 @@ export default function WorkspaceModulePage() {
       const update = workspace === "bugs" ? { status, updated_at: new Date().toISOString() } : { status };
       const { error } = await db.from(table).update(update).eq("id", item.id);
       if (error) throw new Error("Status update was rejected by the database policy.");
-      setMessage("Status updated."); await load();
+      await load(); setMessage("Status updated.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Status update failed."); }
     finally { setSaving(false); }
   }
@@ -124,6 +140,13 @@ export default function WorkspaceModulePage() {
       <div style={{ ...panel, marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
         <ShieldCheck color="#d5b367" size={22}/><div><strong>Access verified</strong><div style={{ color: "#a9a8ad", fontSize: 13, marginTop: 4 }}>{primaryRole ? primaryRole.replaceAll("_", " ") : "Checking role"} · Database row-level security remains active</div></div>
       </div>
+      {workspace === "bugs" && roles.includes("tester") && <form onSubmit={submitBugReport} style={{ ...panel, marginBottom: 20, display: "grid", gap: 14 }}>
+        <h2 style={{ margin: 0, fontSize: 20 }}>Report a product issue</h2>
+        <label>Short title<input style={field} maxLength={140} required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Describe the issue briefly"/></label>
+        <label>Steps and details<textarea style={{ ...field, minHeight: 110, resize: "vertical" }} maxLength={5000} required value={bugDescription} onChange={(e) => setBugDescription(e.target.value)} placeholder="What happened, and what did you expect?"/></label>
+        <label>Severity<select style={field} value={severity} onChange={(e) => setSeverity(e.target.value)}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></label>
+        <div><button style={button} disabled={saving}><Plus size={15}/>{saving ? "Submitting…" : "Submit bug report"}</button></div>
+      </form>}
       {canPublish && <form onSubmit={publish} style={{ ...panel, marginBottom: 20, display: "grid", gap: 14 }}>
         <h2 style={{ margin: 0, fontSize: 20 }}>Publish announcement</h2>
         <label>Title<input style={field} maxLength={140} required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. School assembly update"/></label>
