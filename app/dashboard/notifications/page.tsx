@@ -71,19 +71,19 @@ export default function NotificationsPage() {
     <section style={{ maxWidth: 900, margin: "0 auto" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 26 }}>
         <a href="/dashboard" style={{ color: "#f0d9a0", textDecoration: "none", fontWeight: 800 }}>KVSync <span style={{ color: "#d3a64f" }}>Pro</span></a>
-        <button style={btn} onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button>
+        <button type="button" style={btn} onClick={() => router.push("/dashboard")}><ArrowLeft size={15}/> Overview</button>
       </header>
       <div style={{ color: "#cba75b", fontSize: 11, letterSpacing: ".16em", fontWeight: 800 }}>SCHOOL COMMUNICATION</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div><h1 style={{ fontSize: "clamp(28px,5vw,42px)", margin: "8px 0" }}>Notifications</h1><p style={{ color: "#a6a5ab", marginTop: 0 }}>{unreadCount} unread · {items.length} recent updates</p></div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button style={btn} onClick={() => void load()} disabled={busy || saving}><RefreshCw size={14}/>{busy ? "Refreshing…" : "Refresh"}</button>
-          <button style={btn} onClick={() => void markAllRead()} disabled={busy || saving || unreadCount === 0}><CheckCheck size={14}/>Mark all read</button>
+          <button type="button" style={btn} onClick={() => void load()} disabled={busy || saving}><RefreshCw size={14}/>{busy ? "Refreshing…" : "Refresh"}</button>
+          <button type="button" style={btn} onClick={() => void markAllRead()} disabled={busy || saving || unreadCount === 0}><CheckCheck size={14}/>Mark all read</button>
         </div>
       </div>
       <div style={{ ...panel, display: "flex", alignItems: "center", gap: 12, marginBottom: 16, color: "#d9c99f" }}><ShieldCheck size={19}/><span>School updates are filtered by database permissions. Read status is saved to your signed-in account.</span></div>
       <label style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}><Search size={17} color="#cba75b"/><input style={field} value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="Search title, message, or audience…" aria-label="Search notifications"/></label>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>{(["all","unread","read"] as Filter[]).map(value => <button key={value} onClick={() => setFilter(value)} aria-pressed={filter === value} style={{ ...btn, background: filter === value ? "#3a2e19" : "#201b13", textTransform: "capitalize" }}>{value === "all" ? `All (${items.length})` : value === "unread" ? `Unread (${unreadCount})` : `Read (${items.length - unreadCount})`}</button>)}</div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>{(["all","unread","read"] as Filter[]).map(value => <button type="button" key={value} onClick={() => setFilter(value)} aria-pressed={filter === value} style={{ ...btn, background: filter === value ? "#3a2e19" : "#201b13", textTransform: "capitalize" }}>{value === "all" ? `All (${items.length})` : value === "unread" ? `Unread (${unreadCount})` : `Read (${items.length - unreadCount})`}</button>)}</div>
       {busy ? <div style={panel}>Loading school updates…</div> : filteredItems.length ? <div style={{ display: "grid", gap: 12 }}>{filteredItems.map(item => {
         const isRead = readIds.includes(item.id);
         return <article key={item.id} style={{ ...panel, borderColor: isRead ? "#393124" : "rgba(215,180,106,.52)" }}>
@@ -93,7 +93,7 @@ export default function NotificationsPage() {
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", color: "#cba75b", fontSize: 12 }}><span>{item.target_role || "School update"} · {isRead ? "Read" : "Unread"}</span><time>{item.created_at ? new Date(item.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "Date unavailable"}</time></div>
               <h2 style={{ fontSize: 18, margin: "8px 0" }}>{item.title}</h2>
               <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", color: "#c6c5ca", lineHeight: 1.65, margin: "0 0 12px" }}>{item.content}</p>
-              <button style={btn} onClick={() => void toggleRead(item.id)} disabled={saving}>{isRead ? "Mark unread" : "Mark as read"}</button>
+              <button type="button" style={btn} onClick={() => void toggleRead(item.id)} disabled={saving}>{isRead ? "Mark unread" : "Mark as read"}</button>
             </div>
           </div>
         </article>;
