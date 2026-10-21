@@ -98,7 +98,7 @@ export default function NotificationsPage() {
           </div>
         </article>;
       })}</div> : <div style={{ ...panel, textAlign: "center", padding: 34 }}><Bell size={25}/><p>{searchText ? "No notifications match your search." : filter === "unread" ? "You're all caught up." : filter === "read" ? "No read notifications in this list." : message || "No recent updates."}</p></div>}
-      {message && !busy && <p role="status" style={{ color: "#f0b7a9" }}>{message}</p>}
+      {message && !busy && <p role="status" aria-live="polite" style={{ color: "#f0b7a9" }}>{message}</p>}
       <p style={{ color: "#8f9098", fontSize: 12, marginTop: 18 }}>Read status is stored with your account metadata. Push notifications and email delivery are not enabled.</p>
     </section>
   </main>;
