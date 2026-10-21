@@ -222,3 +222,25 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .accounts-loading{min-height:100vh;display:grid;place-items:center;color:#d7b46a;font-size:12px}
 .classes-provision-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:0 12px;border:1px solid rgba(215,180,106,.3);border-radius:8px;background:rgba(215,180,106,.08);color:#e0c37f;font-size:10px;cursor:pointer}
 @media(max-width:640px){.accounts-topbar{height:64px;padding:0 16px}.accounts-content{width:calc(100% - 32px);padding-top:32px}.accounts-heading{align-items:flex-start;flex-direction:column}.accounts-fields{grid-template-columns:1fr}.accounts-form{padding:16px}.accounts-form-actions{align-items:stretch;flex-direction:column}.accounts-form-actions button{width:100%}.accounts-shield{font-size:8px}}
+
+
+/* Attendance marking workspace */
+
+.attendance-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 18px}
+.attendance-controls label{display:grid;gap:8px;color:#d6c89f;font-size:10px;letter-spacing:.4px}
+.attendance-controls label span{display:flex;align-items:center;gap:7px}
+.attendance-controls select,.attendance-controls input,.attendance-roster-row select,.attendance-roster-row input{width:100%;min-width:0;min-height:40px;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#111216;color:#e8e5dc;font-size:11px}
+.attendance-roster{border:1px solid rgba(215,180,106,.19);border-radius:12px;overflow:hidden;background:#101114}
+.attendance-roster-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border-bottom:1px solid rgba(255,255,255,.07);background:#141519}
+.attendance-roster-heading h2{font:500 20px Georgia,serif;margin:0;color:#f0e9d9}
+.attendance-roster-heading p{font-size:10px;color:#96979e;line-height:1.6;margin:6px 0 0}
+.attendance-roster-heading button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:9px 12px;border:1px solid #d7b46a;border-radius:8px;background:linear-gradient(105deg,#caa75b,#e4c982);color:#18140c;font-size:11px;font-weight:750;cursor:pointer;white-space:nowrap}
+.attendance-roster-row{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(125px,.65fr) minmax(160px,1fr) auto;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.055)}
+.attendance-student{display:grid;gap:5px;min-width:0}
+.attendance-student strong{font-size:11px;font-weight:600;color:#e2dfd7;overflow-wrap:anywhere}
+.attendance-student small,.attendance-existing{font-size:9px;color:#85868d}
+.attendance-roster-row select,.attendance-roster-row input{min-height:36px;padding:8px 9px}
+.attendance-existing{white-space:nowrap}
+.attendance-roster-footer{padding:12px 16px;color:#888992;font-size:9px;line-height:1.7;background:#121316}
+.attendance-status-message{margin-top:16px;min-height:auto;border-color:rgba(215,180,106,.18)}
+@media(max-width:760px){.attendance-controls{grid-template-columns:1fr}.attendance-roster-heading{align-items:flex-start;flex-direction:column}.attendance-roster-heading button{width:100%}.attendance-roster-row{grid-template-columns:minmax(0,1fr) minmax(120px,.8fr);gap:9px;padding:13px}.attendance-roster-row input{grid-column:1/-1}.attendance-existing{grid-column:1/-1}}
