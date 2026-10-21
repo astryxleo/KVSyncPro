@@ -154,7 +154,7 @@ export default function AccountsPage() {
                 <label>Roll number<input value={rollNumber} onChange={(event) => setRollNumber(event.target.value)} maxLength={30} placeholder="Enter roll number" required /></label>
               </>}
             </div>
-            {message && <div className={`accounts-message ${message.kind}`} role={message.kind === "error" ? "alert" : "status"}>{message.kind === "success" ? <CheckCircle2 size={17} /> : <ShieldCheck size={17} />}{message.text}</div>}
+            {message && <div className={`accounts-message ${message.kind}`} role={message.kind === "error" ? "alert" : "status"} aria-live={message.kind === "error" ? "assertive" : "polite"}>{message.kind === "success" ? <CheckCircle2 size={17} /> : <ShieldCheck size={17} />}{message.text}</div>}
             <div className="accounts-form-actions"><span>Operator-only management roles stay protected.</span><button type="submit" disabled={saving || !canCreate}>{saving ? "Creating account…" : "Create account"} <MailPlus size={16} /></button></div>
           </form>
         )}
