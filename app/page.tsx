@@ -65,7 +65,7 @@ export default function Home() {
       <div className="ambient ambient-two" />
       <header className="topbar">
         <a className="brand" href="/" aria-label="KVSync Pro home">
-          <span className="brand-mark"><span>KV</span></span>
+          <span className="brand-mark"><img src="https://raw.githubusercontent.com/astryxleo/KVSyncPro/main/download.png" alt="" width="42" height="42" /></span>
           <span className="brand-copy"><strong>KVSync <em>Pro</em></strong><small>PM SHRI KENDRIYA VIDYALAYA · JANAKPURI</small></span>
         </a>
         <div className="secure-label"><span className="secure-dot" /> SECURE SCHOOL WORKSPACE</div>
@@ -85,7 +85,7 @@ export default function Home() {
         </div>
 
         <section className="login-card" aria-labelledby="login-title">
-          <div className="card-emblem"><Fingerprint size={23} /></div>
+          <div className="card-emblem"><img src="https://raw.githubusercontent.com/astryxleo/KVSyncPro/main/download.png" alt="KVSync Pro logo" width="42" height="42" style={{objectFit:"contain"}} /></div>
           {signedIn ? (
             <div className="welcome-panel">
               <div className="status-pill"><span className="secure-dot" /> AUTHENTICATED</div>
