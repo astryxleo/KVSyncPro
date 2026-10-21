@@ -103,7 +103,7 @@ export default function AccountsPage() {
       });
       if (error) {
         const detail = typeof data?.error === "string" ? data.error : error.message;
-        throw new Error(detail || "Account invitation failed.");
+        throw new Error(detail || "Account creation failed.");
       }
       if (data?.error) throw new Error(String(data.error));
       setMessage({
