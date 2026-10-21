@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity, ArrowDownLeft, ArrowRight, Bell, BookOpen, CalendarCheck2, CheckCircle2,
   ChevronRight, CircleHelp, ClipboardCheck, FileText, GraduationCap, LayoutDashboard,
-  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu, UserPlus
+  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu, UserPlus, Settings, UserRound
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
@@ -20,6 +20,9 @@ const roleLabels: Record<Role, string> = {
 
 const modules: ModuleItem[] = [
   { label: "Overview", description: "Your workspace at a glance", icon: LayoutDashboard, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
+  { label: "Notifications", description: "Recent school updates and announcements", icon: Bell, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
+  { label: "My profile", description: "View your account identity and assigned roles", icon: UserRound, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
+  { label: "Settings", description: "Update your profile and change your password", icon: Settings, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
   { label: "Attendance", description: "Class attendance and records", icon: CalendarCheck2, roles: ["operator","admin","teacher","student"] },
   { label: "Classes & people", description: "Class rosters and school accounts", icon: Users, roles: ["operator","admin","teacher"] },
   { label: "Account provisioning", description: "Create school accounts without email invitations", icon: UserPlus, roles: ["operator","admin","data_content_manager"] },
@@ -112,6 +115,9 @@ export default function DashboardPage() {
       "Bug reports": "/dashboard/bugs",
       "Support inbox": "/dashboard/support",
       "System activity": "/dashboard/activity",
+      "Notifications": "/dashboard/notifications",
+      "My profile": "/dashboard/profile",
+      "Settings": "/dashboard/settings",
     };
     const path = paths[label];
     if (path) {
