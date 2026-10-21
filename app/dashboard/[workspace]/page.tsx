@@ -39,12 +39,14 @@ export default function WorkspaceModulePage() {
   const [targetRole, setTargetRole] = useState("all");
   const [bugDescription, setBugDescription] = useState("");
   const [severity, setSeverity] = useState("medium");
+  const [searchText, setSearchText] = useState("");
 
   const validWorkspace = Object.prototype.hasOwnProperty.call(labels, workspace);
   const primaryRole = useMemo(() => roles.find((role) => allowedRoles[workspace]?.includes(role)) ?? "", [roles, workspace]);
   const isStaff = roles.some((role) => ["operator", "admin", "support_manager"].includes(role));
   const canPublish = workspace === "content" && roles.some((role) => ["operator", "admin"].includes(role));
   const canReviewBugs = workspace === "bugs" && isStaff;
+  const filteredItems = items.filter((item) => `${item.title ?? ""} ${item.subject ?? ""} ${item.content ?? ""} ${item.description ?? ""} ${item.message ?? ""} ${item.reason ?? ""} ${item.status ?? ""} ${item.severity ?? ""} ${item.action ?? ""}`.toLowerCase().includes(searchText.trim().toLowerCase()));
 
   const load = useCallback(async () => {
     if (!validWorkspace) { setBusy(false); return; }
@@ -155,8 +157,9 @@ export default function WorkspaceModulePage() {
         <div><button style={button} disabled={saving}><Plus size={15}/>{saving ? "Publishing…" : "Publish update"}</button></div>
       </form>}
       {message && <div role="status" style={{ ...panel, marginBottom: 18, color: "#e8d7a9" }}>{message}</div>}
-      {busy ? <div style={panel}>Loading securely…</div> : items.length ? <div style={{ display: "grid", gap: 12 }}>
-        {items.map((item) => <article key={item.id} style={panel}>
+      <label style={{ display: "block", marginBottom: 16, color: "#d8c89f", fontSize: 13 }}>Search records<input style={field} value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Search title, details, status, or severity…" aria-label="Search workspace records"/></label>
+      {busy ? <div style={panel}>Loading securely…</div> : filteredItems.length ? <div style={{ display: "grid", gap: 12 }}>
+        {filteredItems.map((item) => <article key={item.id} style={panel}>
           <div style={{ display: "flex", alignItems: "start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div style={{ display: "flex", gap: 12, alignItems: "start", minWidth: 0, flex: 1 }}><span style={{ color: "#d3ad5e", paddingTop: 3 }}><Icon size={19}/></span><div style={{ minWidth: 0, flex: 1 }}>
               <h2 style={{ margin: 0, fontSize: 18, overflowWrap: "anywhere" }}>{item.title || item.subject || item.action || "Activity record"}</h2>
@@ -170,7 +173,7 @@ export default function WorkspaceModulePage() {
             </div>
           </div>
         </article>)}
-      </div> : <div style={panel}><CheckCircle2 color="#d3ad5e" size={20}/><p style={{ color: "#aaa9ad", marginBottom: 0 }}>{message || "No records are available to this account yet."}</p></div>}
+      </div> : <div style={panel}><CheckCircle2 color="#d3ad5e" size={20}/><p style={{ color: "#aaa9ad", marginBottom: 0 }}>{searchText ? "No records match your search." : message || "No records are available to this account yet."}</p></div>}
       {workspace === "content" && !canPublish && <p style={{ color: "#85848b", fontSize: 12, lineHeight: 1.6, marginTop: 18 }}>Your role has read access to updates visible under database policies. Publishing is restricted to Operator and Administrator until the content-manager write policy is separately approved.</p>}
     </section>
   </main>;
