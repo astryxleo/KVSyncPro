@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, MailPlus, RefreshCw, ShieldCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, MailPlus, ShieldCheck, UserPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 type AppRole = "operator" | "admin" | "teacher" | "student" | "system_moderator" | "data_content_manager" | "tester" | "support_manager";
