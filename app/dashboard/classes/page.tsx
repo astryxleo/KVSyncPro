@@ -406,7 +406,7 @@ export default function ClassesPage() {
           <Search size={16} />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search class, room, roll number or student name" />
         </label>
-        {busy ? <div className="classes-empty">Loading class records securely…</div> : message && !classes.length ? <div className="classes-empty">{message}</div> : visibleClasses.length ? (
+        {busy ? <div className="classes-empty">Loading class records securely…</div> : message && !classes.length ? <div role="status" aria-live="polite" className="classes-empty">{message}</div> : visibleClasses.length ? (
           <div className="classes-grid">
             {visibleClasses.map((schoolClass) => {
               const roster = students.filter((student) => student.class_id === schoolClass.id);
@@ -479,7 +479,7 @@ export default function ClassesPage() {
               );
             })}
           </div>
-        ) : <div className="classes-empty">No classes match your search.</div>}
+        ) : <div role="status" aria-live="polite" className="classes-empty">No classes match your search.</div>}
         <p className="classes-caveat">Teacher homeroom assignment and class creation are available to Operator/Admin and remain enforced by database policies. Student roster export is restricted to Operator/Admin. Account invitations are handled in the dedicated provisioning workspace.</p>
       </section>
     </main>
