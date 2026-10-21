@@ -108,7 +108,7 @@ export default function AccountsPage() {
       if (data?.error) throw new Error(String(data.error));
       setMessage({
         kind: "success",
-        text: `Invitation created for ${email.trim().toLowerCase()}. The user must complete the email invitation before signing in.`,
+        text: `Account created: ${email.trim().toLowerCase()} | Temporary password: ${data.temporary_password} | Share these credentials privately. The password is shown only now; no email was sent.`,
       });
       setFullName("");
       setEmail("");
@@ -138,7 +138,7 @@ export default function AccountsPage() {
         </div>
         <div className="accounts-info">
           <div className="accounts-info-icon"><MailPlus size={20} /></div>
-          <div><strong>Invitation-based onboarding</strong><p>The server validates your role, creates the account, and assigns the requested role. New users receive an email invitation; passwords are not entered or stored in this form.</p></div>
+          <div><strong>Operator-managed login credentials</strong><p>The server creates a confirmed KVSync Pro login ID and a one-time temporary password. No invitation email or SMTP is used. Share the password privately and securely.</p></div>
         </div>
         {!canCreate ? (
           <div className="accounts-message error">Your assigned role does not include account provisioning.</div>
@@ -147,7 +147,7 @@ export default function AccountsPage() {
             <div className="accounts-form-title"><UserPlus size={18} /><div><strong>New account</strong><small>All fields are validated before the request is sent.</small></div></div>
             <div className="accounts-fields">
               <label>Full name<input value={fullName} onChange={(event) => setFullName(event.target.value)} maxLength={120} autoComplete="name" placeholder="Enter the person's full name" required /></label>
-              <label>Email address<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} autoComplete="email" placeholder="person@school.edu" required /></label>
+              <label>KVSync Pro login ID<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} autoComplete="off" placeholder="teacher01@kvsync.pro" pattern="^[^\\s@]+@kvsync\\.pro$" title="Use a login ID ending in @kvsync.pro" required /></label>
               <label>Account role<select value={role} onChange={(event) => setRole(event.target.value as AppRole)} required>{roleOptions.map((item) => <option key={item} value={item}>{roleNames[item]}</option>)}</select></label>
               {role === "student" && <>
                 <label>Class and section<select value={classId} onChange={(event) => setClassId(event.target.value)} required><option value="">Select class</option>{classes.map((item) => <option key={item.id} value={item.id}>Class {item.grade}{item.section}</option>)}</select></label>
@@ -155,7 +155,7 @@ export default function AccountsPage() {
               </>}
             </div>
             {message && <div className={`accounts-message ${message.kind}`} role={message.kind === "error" ? "alert" : "status"}>{message.kind === "success" ? <CheckCircle2 size={17} /> : <ShieldCheck size={17} />}{message.text}</div>}
-            <div className="accounts-form-actions"><span>Operator-only management roles stay protected.</span><button type="submit" disabled={saving || !canCreate}>{saving ? "Creating invitation…" : "Create account & send invite"} <MailPlus size={16} /></button></div>
+            <div className="accounts-form-actions"><span>Operator-only management roles stay protected.</span><button type="submit" disabled={saving || !canCreate}>{saving ? "Creating account…" : "Create account"} <MailPlus size={16} /></button></div>
           </form>
         )}
         <div className="accounts-security-note"><ShieldCheck size={16} /><p>Security note: account creation is enforced by the <code>manage-users</code> server function, not just this screen. Operator accounts are intentionally excluded from this form.</p></div>
