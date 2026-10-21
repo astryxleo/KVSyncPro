@@ -97,6 +97,24 @@ export default function DashboardPage() {
     }
   }
 
+  function openModule(label: string) {
+    const paths: Record<string, string> = {
+      "Classes & people": "/dashboard/classes",
+      "Attendance": "/dashboard/attendance",
+      "Learning hub": "/dashboard/learning",
+      "Timetable": "/dashboard/timetable",
+      "Announcements": "/dashboard/announcements",
+      "Community": "/dashboard/community",
+      "Moderation": "/dashboard/moderation",
+    };
+    const path = paths[label];
+    if (path) {
+      router.push(path);
+      return;
+    }
+    setActive(label);
+  }
+
   if (loading) {
     return <main className="dashboard-loading"><span className="loading-mark">KV</span><p>Securing your workspace…</p></main>;
   }
@@ -113,7 +131,7 @@ export default function DashboardPage() {
         <nav className="dash-nav" aria-label="Workspace navigation">
           {visibleModules.map((item) => {
             const Icon = item.icon;
-            return <button key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setMobileOpen(false); if (item.label === "Attendance") { router.push("/dashboard/attendance"); return; } if (item.label === "Learning hub") { router.push("/dashboard/learning"); return; } if (item.label === "Timetable") { router.push("/dashboard/timetable"); return; } if (item.label === "Announcements") { router.push("/dashboard/announcements"); return; } if (item.label === "Community") { router.push("/dashboard/community"); return; } if (item.label === "Moderation") { router.push("/dashboard/moderation"); return; } setActive(item.label); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
+            return <button key={item.label} className={`dash-nav-item ${active === item.label ? "active" : ""}`} onClick={() => { setMobileOpen(false); openModule(item.label); }}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{active === item.label && <ChevronRight className="nav-chevron" size={15} />}</button>;
           })}
         </nav>
         <div className="dash-sidebar-bottom"><div className="dash-secure-note"><span className="secure-dot" /><span><strong>Protected workspace</strong><small>Access checked against assigned role</small></span></div><button className="dash-signout" onClick={() => void signOut()} disabled={signingOut}><LogOut size={16} />{signingOut ? "Signing out…" : "Sign out"}</button></div>
@@ -134,7 +152,7 @@ export default function DashboardPage() {
             <>
               <div className="dash-highlight"><div className="highlight-icon"><ShieldCheck size={21} /></div><div><strong>Identity verified · Role-aware access enabled</strong><p>KVSync Pro has checked your active session and loaded the modules associated with your assigned role{roles.length > 1 ? "s" : ""}.</p></div><CheckCircle2 className="highlight-check" size={19} /></div>
               <div className="dash-section-heading"><div><h2>Your modules</h2><p>Choose a workspace to continue.</p></div><span>{visibleModules.length} AVAILABLE</span></div>
-              <div className="dash-module-grid">{visibleModules.filter((item) => item.label !== "Overview").map((item) => { const Icon = item.icon; return <button key={item.label} className="dash-module-card" onClick={() => setActive(item.label)}><span className="module-icon"><Icon size={19} /></span><span className="module-card-title">{item.label}</span><span className="module-card-description">{item.description}</span><span className="module-card-footer">Open module <ArrowRight size={14} /></span></button>; })}</div>
+              <div className="dash-module-grid">{visibleModules.filter((item) => item.label !== "Overview").map((item) => { const Icon = item.icon; return <button key={item.label} className="dash-module-card" onClick={() => openModule(item.label)}><span className="module-icon"><Icon size={19} /></span><span className="module-card-title">{item.label}</span><span className="module-card-description">{item.description}</span><span className="module-card-footer">Open module <ArrowRight size={14} /></span></button>; })}</div>
               <div className="dash-bottom-grid"><div className="dash-info-card"><div className="info-card-heading"><span className="module-icon small"><WalletCards size={17} /></span><div><strong>Workspace status</strong><small>Application readiness</small></div></div><div className="status-line"><span>Sign-in session</span><span className="state-live"><span /> Verified</span></div><div className="status-line"><span>Role permissions</span><span className="state-live"><span /> Loaded</span></div><div className="status-line"><span>Feature rollout</span><span className="state-pending">In progress</span></div></div><div className="dash-info-card dash-next-card"><div className="info-card-heading"><span className="module-icon small"><ArrowDownLeft size={17} /></span><div><strong>Built in phases</strong><small>KVSync Pro development</small></div></div><p>Module screens are being connected to live school data in stages. Only use features that are available in your workspace; an empty or unfinished module is not a school record.</p></div></div>
             </>
           ) : (
