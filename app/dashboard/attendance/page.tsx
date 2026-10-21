@@ -32,12 +32,14 @@ export default function AttendancePage() {
         if (!student) { setRows([]); setMessage("Your student profile is not linked yet. Ask the operator to complete account provisioning."); return; }
         q = q.eq("student_id", student.id);
       } else if (currentRole === "teacher") {
-        const [classAssignments, subjectAssignments] = await Promise.all([
-          db.from("class_teachers").select("class_id").eq("teacher_id", auth.user.id),
-          db.from("class_subject_teachers").select("class_id").eq("teacher_id", auth.user.id),
-        ]);
-        if (classAssignments.error || subjectAssignments.error) throw new Error("Could not verify your teaching assignments. Attendance is hidden.");
-        const classIds = [...new Set([...(classAssignments.data ?? []), ...(subjectAssignments.data ?? [])].map((row: {class_id:string}) => row.class_id))];
+        // Match the current database attendance RLS policy: class_teachers assignments only.
+        // Subject-teacher assignments do not currently grant attendance access at the database layer.
+        const { data: classAssignments, error: assignmentError } = await db
+          .from("class_teachers")
+          .select("class_id")
+          .eq("teacher_id", auth.user.id);
+        if (assignmentError) throw new Error("Could not verify your class-teacher assignment. Attendance is hidden.");
+        const classIds = [...new Set((classAssignments ?? []).map((row: {class_id:string}) => row.class_id))];
         if (!classIds.length) {
           setRows([]);
           setMessage("No classes are linked to your teacher account yet.");
