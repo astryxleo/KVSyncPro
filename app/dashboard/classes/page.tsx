@@ -11,6 +11,7 @@ type StudentRow = { id: string; user_id: string; class_id: string; roll_number: 
 type ProfileRow = { user_id: string; full_name: string | null; email?: string | null };
 type TeacherRow = { user_id: string; full_name: string | null; email: string | null };
 type ClassTeacherRow = { id: string; class_id: string; teacher_id: string; academic_year: string };
+type SubjectTeacherRow = { id: string; class_id: string; teacher_id: string; subject: string };
 
 export default function ClassesPage() {
   const router = useRouter();
@@ -20,6 +21,10 @@ export default function ClassesPage() {
   const [names, setNames] = useState<Record<string, string>>({});
   const [teachers, setTeachers] = useState<TeacherRow[]>([]);
   const [classTeachers, setClassTeachers] = useState<ClassTeacherRow[]>([]);
+  const [subjectTeachers, setSubjectTeachers] = useState<SubjectTeacherRow[]>([]);
+  const [subjectClass, setSubjectClass] = useState("");
+  const [subjectTeacher, setSubjectTeacher] = useState("");
+  const [subjectName, setSubjectName] = useState("");
   const [assignmentClass, setAssignmentClass] = useState("");
   const [assignmentTeacher, setAssignmentTeacher] = useState("");
   const [assignmentBusy, setAssignmentBusy] = useState(false);
@@ -91,14 +96,16 @@ export default function ClassesPage() {
       setStudents(nextStudents);
 
       if (currentRole === "operator" || currentRole === "admin") {
-        const [teacherRoleResult, assignmentResult] = await Promise.all([
+        const [teacherRoleResult, assignmentResult, subjectAssignmentResult] = await Promise.all([
           db.from("user_roles").select("user_id").eq("role", "teacher"),
-          db.from("class_teachers").select("id,class_id,teacher_id,academic_year").order("academic_year", { ascending: false }),
+          db.from("class_teachers").select("id,class_id,teacher_id,academic_year").eq("academic_year", "2026-2027"),
+          db.from("class_subject_teachers").select("id,class_id,teacher_id,subject").order("subject"),
         ]);
-        if (teacherRoleResult.error || assignmentResult.error) throw new Error("Teacher assignments could not be loaded.");
+        if (teacherRoleResult.error || assignmentResult.error || subjectAssignmentResult.error) throw new Error("Teacher assignments could not be loaded.");
         const teacherIds = [...new Set((teacherRoleResult.data ?? []).map((row: { user_id: string }) => row.user_id))];
         const assignmentRows = (assignmentResult.data ?? []) as ClassTeacherRow[];
         setClassTeachers(assignmentRows);
+        setSubjectTeachers((subjectAssignmentResult.data ?? []) as SubjectTeacherRow[]);
         if (teacherIds.length) {
           const { data: teacherProfiles, error: teacherProfilesError } = await db
             .from("profiles").select("user_id,full_name,email").in("user_id", teacherIds);
@@ -110,6 +117,7 @@ export default function ClassesPage() {
       } else {
         setTeachers([]);
         setClassTeachers([]);
+        setSubjectTeachers([]);
       }
 
       if (currentRole === "operator" || currentRole === "admin") {
@@ -213,6 +221,62 @@ export default function ClassesPage() {
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to assign this teacher.");
+    } finally {
+      setAssignmentBusy(false);
+    }
+  };
+
+  const assignSubjectTeacher = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const subject = subjectName.trim();
+    if ((role !== "operator" && role !== "admin") || !subjectClass || !subjectTeacher || !subject || subject.length > 80) return;
+    setAssignmentBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) { router.replace("/"); return; }
+      const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
+      if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
+        throw new Error("Only Operator or Admin can manage subject-teacher assignments.");
+      }
+      const { error } = await db.from("class_subject_teachers").insert({ class_id: subjectClass, teacher_id: subjectTeacher, subject });
+      if (error) {
+        if (error.code === "23505") throw new Error("This teacher is already assigned to that subject in this class.");
+        if (error.code === "42501") throw new Error("Database permissions do not allow this assignment.");
+        throw new Error("Could not assign the subject teacher. Check the selected teacher account.");
+      }
+      setSubjectName("");
+      setSubjectTeacher("");
+      setSubjectClass("");
+      setMessage("Subject teacher assigned successfully.");
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to assign this subject teacher.");
+    } finally {
+      setAssignmentBusy(false);
+    }
+  };
+
+  const removeSubjectTeacher = async (assignment: SubjectTeacherRow) => {
+    if (role !== "operator" && role !== "admin") return;
+    if (!window.confirm(`Remove ${assignment.subject} teacher assignment from this class?`)) return;
+    setAssignmentBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: auth, error: authError } = await db.auth.getUser();
+      if (authError || !auth.user) { router.replace("/"); return; }
+      const { data: roleRows, error: roleError } = await db.from("user_roles").select("role").eq("user_id", auth.user.id);
+      if (roleError || !(roleRows ?? []).some((row: { role: string }) => ["operator", "admin"].includes(row.role))) {
+        throw new Error("Only Operator or Admin can manage subject-teacher assignments.");
+      }
+      const { error } = await db.from("class_subject_teachers").delete().eq("id", assignment.id);
+      if (error) throw new Error("Could not remove the subject assignment under current database permissions.");
+      setMessage("Subject teacher assignment removed.");
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to remove this subject teacher.");
     } finally {
       setAssignmentBusy(false);
     }
@@ -343,6 +407,28 @@ export default function ClassesPage() {
                       </div>
                     );
                   })()}
+                  {(role === "operator" || role === "admin") && (
+                    <div className="classes-assignment">
+                      <div className="classes-assignment-heading">Subject teachers</div>
+                      {subjectTeachers.filter((item) => item.class_id === schoolClass.id).map((item) => {
+                        const teacher = teachers.find((person) => person.user_id === item.teacher_id);
+                        return (
+                          <div className="classes-subject-row" key={item.id}>
+                            <span><b>{item.subject}</b><small>{teacher?.full_name || teacher?.email || "Assigned teacher"}</small></span>
+                            <button type="button" disabled={assignmentBusy} onClick={() => void removeSubjectTeacher(item)}>Remove</button>
+                          </div>
+                        );
+                      })}
+                      <form className="classes-subject-form" onSubmit={assignSubjectTeacher}>
+                        <input aria-label="Subject name" value={subjectClass === schoolClass.id ? subjectName : ""} onChange={(event) => { setSubjectClass(schoolClass.id); setSubjectName(event.target.value); }} maxLength={80} placeholder="Subject (e.g. Mathematics)" required />
+                        <select aria-label="Subject teacher" value={subjectClass === schoolClass.id ? subjectTeacher : ""} onChange={(event) => { setSubjectClass(schoolClass.id); setSubjectTeacher(event.target.value); }} required>
+                          <option value="">Select teacher</option>
+                          {teachers.map((item) => <option key={item.user_id} value={item.user_id}>{item.full_name || item.email || item.user_id}</option>)}
+                        </select>
+                        <button type="submit" disabled={assignmentBusy || !teachers.length}>{assignmentBusy ? "Saving…" : "Assign subject"}</button>
+                      </form>
+                    </div>
+                  )}
                   {roster.length ? (
                     <div className="classes-roster">
                       {roster.slice(0, 8).map((student) => (
