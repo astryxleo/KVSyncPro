@@ -60,8 +60,8 @@ export default function TimetablePage() {
         studentClassId = student.class_id;
       }
       let query = db.from("timetables").select("id,class_id,day_of_week,period_number,subject,teacher_name,file_url,classes(grade,section)").order("period_number",{ascending:true}).limit(200);
-      if (classId) {
-        query = query.eq("class_id", classId);
+      if (studentClassId) {
+        query = query.eq("class_id", studentClassId);
       } else if (currentRole === "teacher") {
         const [classAssignments, subjectAssignments] = await Promise.all([
           db.from("class_teachers").select("class_id").eq("teacher_id", auth.user.id),
