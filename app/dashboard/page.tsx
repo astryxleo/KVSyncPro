@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity, ArrowDownLeft, ArrowRight, Bell, BookOpen, CalendarCheck2, CheckCircle2,
   ChevronRight, CircleHelp, ClipboardCheck, FileText, GraduationCap, LayoutDashboard,
-  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu
+  LogOut, MessageSquare, ShieldCheck, Users, WalletCards, Wrench, Menu, UserPlus
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
@@ -22,6 +22,7 @@ const modules: ModuleItem[] = [
   { label: "Overview", description: "Your workspace at a glance", icon: LayoutDashboard, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
   { label: "Attendance", description: "Class attendance and records", icon: CalendarCheck2, roles: ["operator","admin","teacher","student"] },
   { label: "Classes & people", description: "Class rosters and school accounts", icon: Users, roles: ["operator","admin","teacher"] },
+  { label: "Account provisioning", description: "Create school accounts and send invitations", icon: UserPlus, roles: ["operator","admin","data_content_manager"] },
   { label: "Learning hub", description: "Homework and study materials", icon: BookOpen, roles: ["operator","admin","teacher","student","data_content_manager"] },
   { label: "Timetable", description: "Class schedules and periods", icon: ClipboardCheck, roles: ["operator","admin","teacher","student"] },
   { label: "Announcements", description: "School and class updates", icon: Bell, roles: ["operator","admin","teacher","student","data_content_manager"] },
@@ -100,6 +101,7 @@ export default function DashboardPage() {
   function openModule(label: string) {
     const paths: Record<string, string> = {
       "Classes & people": "/dashboard/classes",
+      "Account provisioning": "/dashboard/accounts",
       "Attendance": "/dashboard/attendance",
       "Learning hub": "/dashboard/learning",
       "Timetable": "/dashboard/timetable",
