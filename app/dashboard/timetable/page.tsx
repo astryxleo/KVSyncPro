@@ -35,7 +35,22 @@ export default function TimetablePage() {
         classId = student.class_id;
       }
       let query = db.from("timetables").select("id,class_id,day_of_week,period_number,subject,teacher_name,file_url").order("period_number",{ascending:true}).limit(200);
-      if (classId) query = query.eq("class_id", classId);
+      if (classId) {
+        query = query.eq("class_id", classId);
+      } else if (currentRole === "teacher") {
+        const [classAssignments, subjectAssignments] = await Promise.all([
+          db.from("class_teachers").select("class_id").eq("teacher_id", auth.user.id),
+          db.from("class_subject_teachers").select("class_id").eq("teacher_id", auth.user.id),
+        ]);
+        if (classAssignments.error || subjectAssignments.error) throw new Error("Could not verify your teaching assignments.");
+        const classIds = [...new Set([...(classAssignments.data ?? []), ...(subjectAssignments.data ?? [])].map((row: {class_id:string}) => row.class_id))];
+        if (!classIds.length) {
+          setPeriods([]);
+          setMessage("No classes are linked to your teacher account yet.");
+          return;
+        }
+        query = query.in("class_id", classIds);
+      }
       const { data, error } = await query;
       if (error) throw new Error("Timetable could not be loaded. Check the database permissions.");
       setPeriods((data ?? []) as Period[]);
