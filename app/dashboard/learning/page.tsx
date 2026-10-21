@@ -79,12 +79,12 @@ export default function LearningPage() {
           classRows = (data ?? []) as SchoolClass[];
         }
         setClasses(classRows);
-        if (!classId && classRows.length) setClassId(classRows[0].id);
+        if (classRows.length) setClassId(current => current || classRows[0].id);
       }
       if (!(hw.data ?? []).length && !(mats.data ?? []).length) setMessage("No homework or study materials are available yet.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Unable to load learning content."); }
     finally { setBusy(false); }
-  }, [router, classId]);
+  }, [router]);
 
   useEffect(() => { void load(); }, [load]);
 
