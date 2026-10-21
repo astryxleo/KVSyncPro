@@ -271,3 +271,74 @@ h1 span{color:var(--gold-bright);font-style:italic}
 .announcements-search-label input,.community-search-label input{width:100%;min-width:0;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1px solid rgba(215,180,106,.24);background:#101115;color:#f5f3ee;font:inherit;outline:none}
 .announcements-search-label input:focus,.community-search-label input:focus{border-color:#d7b46a;box-shadow:0 0 0 3px rgba(215,180,106,.1)}
 .announcements-search-label input::placeholder,.community-search-label input::placeholder{color:#777983}
+
+
+/* KVSync Pro finishing pass: responsive safety, accessible focus, and shared control states */
+:root {
+  color-scheme: dark;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { width: 100%; min-width: 320px; overflow-x: clip; }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+img, video, canvas, iframe, svg { max-width: 100%; }
+main, section, article, header, footer, nav, form, fieldset { min-width: 0; }
+p, h1, h2, h3, h4, small, label, a, button, span { overflow-wrap: anywhere; }
+input, select, textarea, button { font: inherit; }
+input, select, textarea { max-width: 100%; }
+textarea { resize: vertical; }
+button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+button, [role="button"] { touch-action: manipulation; }
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid #f0d79b !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 4px rgba(215,180,106,.16);
+}
+:where(input, select, textarea):disabled,
+:where(button):disabled { opacity: .58; cursor: not-allowed; }
+:where(input, select, textarea)[aria-invalid="true"] {
+  border-color: #e88e8e !important;
+  box-shadow: 0 0 0 3px rgba(232,142,142,.1);
+}
+:where(input, select, textarea)::placeholder { opacity: 1; }
+:where(button, a) { transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .16s ease; }
+@media (hover:hover) {
+  :where(button:not(:disabled), [role="button"]:not([aria-disabled="true"])):hover { filter: brightness(1.08); }
+}
+:where(button, input, select, textarea) { scroll-margin-block: 18px; }
+[role="alert"], [aria-live="polite"], [aria-live="assertive"] { overflow-wrap: anywhere; }
+:where(table) { width: 100%; border-collapse: collapse; }
+:where(pre, code) { overflow-wrap: anywhere; }
+:where(.dashboard-content, .dashboard-main, .workspace-content, .page-content, .accounts-content, .classes-content) { min-width: 0; max-width: 100%; }
+:where(.dashboard-content, .dashboard-main, .workspace-content) :where(.card, .panel, .section, article) { min-width: 0; }
+:where(.search, [class*="-search"]) input { min-width: 0; }
+:where(.empty-state, [class*="-empty"], [class*="Empty"]) { overflow-wrap: anywhere; }
+:where(.error, .form-error, .error-message, [data-state="error"]) { color: #f0aaaa; }
+:where(.success, .form-success, .success-message, [data-state="success"]) { overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  html { scroll-padding-top: 12px; }
+  :where(.dashboard-content, .dashboard-main, .workspace-content, .page-content) { padding-inline: clamp(14px, 4vw, 22px); }
+  :where(.page-header, .section-header, .workspace-header) { flex-wrap: wrap; gap: 12px; }
+  :where(.page-header h1, .section-header h1, .workspace-header h1) { max-width: 100%; font-size: clamp(23px, 6vw, 32px); }
+  :where(.stats-grid, .metrics-grid, .dashboard-stats) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.content-grid, .two-column-grid, .workspace-grid) { grid-template-columns: minmax(0, 1fr); }
+  :where(.table-wrap, .table-container, [data-table-scroll]) { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+  :where(.table-wrap, .table-container) table { min-width: 560px; }
+  :where(form) { max-width: 100%; }
+  :where(form) :where(input, select, textarea) { min-width: 0; }
+  :where(form button[type="submit"], form input[type="submit"]) { min-height: 42px; }
+  :where(.form-actions, .toolbar, .page-actions) { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  :where(.stats-grid, .metrics-grid, .dashboard-stats) { grid-template-columns: minmax(0, 1fr); }
+  :where(.form-actions, .page-actions) > button,
+  :where(form) button[type="submit"] { max-width: 100%; }
+  :where(.modal, .dialog, [role="dialog"]) { width: min(100% - 20px, 560px); max-height: calc(100dvh - 24px); overflow: auto; }
+  :where(.card, .panel, .section-card) { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
