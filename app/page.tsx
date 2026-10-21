@@ -92,7 +92,7 @@ export default function Home() {
               <h2 id="login-title">You’re signed in.</h2>
               <p className="card-subtitle">Your account has been authenticated and its assigned role was retrieved.</p>
               <div className="account-summary"><span className="summary-label">ACCOUNT</span><strong>{signedIn.email}</strong><span className="summary-label role-label">ASSIGNED ROLE{signedIn.roles.length > 1 ? "S" : ""}</span><div className="role-list">{signedIn.roles.map((role) => <span className="role-chip" key={role}>{roleLabels[role] ?? role}</span>)}</div></div>
-              <p className="notice">The dashboard modules are still being built. Authentication alone does not enable unimplemented features.</p>
+              <p className="notice">Your workspace access follows the roles assigned to this school account.</p>
               <button className="submit-button" type="button" onClick={handleSignOut}>Sign out <ArrowRight size={17} /></button>
             </div>
           ) : (
@@ -102,7 +102,7 @@ export default function Home() {
               <p className="card-subtitle">Use the school account provided to you.</p>
               <form className="login-form" onSubmit={handleSubmit}>
                 <label htmlFor="email">Email address</label>
-                <div className="input-wrap"><Mail size={17} /><input id="email" type="email" autoComplete="username" placeholder="you@school.edu" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
+                <div className="input-wrap"><Mail size={17} /><input id="email" type="email" autoComplete="username" placeholder="username@kvsync.pro" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
                 <div className="label-row"><label htmlFor="password">Password</label><span className="managed-note"><LockKeyhole size={12} /> PRIVATE ACCESS</span></div>
                 <div className="input-wrap"><LockKeyhole size={17} /><input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /><button className="reveal-button" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
                 {message && <div className="form-message" role="alert">{message}</div>}
