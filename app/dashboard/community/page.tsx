@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, MessageSquare, RefreshCw, ShieldCheck, EyeOff, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -39,7 +39,7 @@ export default function CommunityPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function postMessage(event: React.FormEvent<HTMLFormElement>) {
+  async function postMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
     if (!text || text.length > 2000 || role !== "student" || posting) return;
