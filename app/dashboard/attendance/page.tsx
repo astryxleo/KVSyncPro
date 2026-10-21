@@ -179,7 +179,7 @@ export default function AttendancePage() {
           <div className="attendance-roster-footer">Only selected rows are saved. Existing records for selected students are updated.</div>
         </div>}
         {!canMark && (message ? <div className="attendance-message">{message}</div> : <div className="attendance-records"><div className="attendance-record-head"><span>Date</span><span>Status</span><span>Class ID</span><span>Student ID</span><span>Note</span></div>{rows.map((record) => <div className="attendance-record" key={record.id}><span>{new Date(record.attendance_date + "T12:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span><span className={"attendance-chip " + record.status}>{record.status}</span><code>{record.class_id.slice(0, 8)}…</code><code>{record.student_id.slice(0, 8)}…</code><span>{record.note || "—"}</span></div>)}<footer>{rows.length} record(s) loaded</footer></div>)}
-        {canMark && message && <div role="status" className="attendance-message attendance-status-message">{message}</div>}
+        {canMark && message && <div role="status" aria-live="polite" className="attendance-message attendance-status-message">{message}</div>}
       </>}
       <p className="attendance-caveat">{canMark ? "Only assigned teachers, administrators, and the Operator can save attendance. Database policies validate class access and student/class matching." : "This view is read-only. Your records are restricted to your linked student account."}</p>
     </section>
