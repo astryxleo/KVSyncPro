@@ -22,7 +22,7 @@ const modules: ModuleItem[] = [
   { label: "Overview", description: "Your workspace at a glance", icon: LayoutDashboard, roles: ["operator","admin","teacher","student","system_moderator","data_content_manager","tester","support_manager"] },
   { label: "Attendance", description: "Class attendance and records", icon: CalendarCheck2, roles: ["operator","admin","teacher","student"] },
   { label: "Classes & people", description: "Class rosters and school accounts", icon: Users, roles: ["operator","admin","teacher"] },
-  { label: "Account provisioning", description: "Create school accounts and send invitations", icon: UserPlus, roles: ["operator","admin","data_content_manager"] },
+  { label: "Account provisioning", description: "Create school accounts without email invitations", icon: UserPlus, roles: ["operator","admin","data_content_manager"] },
   { label: "Learning hub", description: "Homework and study materials", icon: BookOpen, roles: ["operator","admin","teacher","student","data_content_manager"] },
   { label: "Timetable", description: "Class schedules and periods", icon: ClipboardCheck, roles: ["operator","admin","teacher","student"] },
   { label: "Announcements", description: "School and class updates", icon: Bell, roles: ["operator","admin","teacher","student","data_content_manager"] },
@@ -107,7 +107,7 @@ export default function DashboardPage() {
       "Timetable": "/dashboard/timetable",
       "Announcements": "/dashboard/announcements",
       "Community": "/dashboard/community",
-      "Moderation": "/dashboard/moderation",
+      "Moderation": "/dashboard/moderation",\n      "Content management": "/dashboard/content",\n      "Bug reports": "/dashboard/bugs",\n      "Support inbox": "/dashboard/support",\n      "System activity": "/dashboard/activity",
     };
     const path = paths[label];
     if (path) {
